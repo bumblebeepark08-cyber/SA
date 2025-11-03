@@ -9,7 +9,7 @@ body {
     font-family: 'BBH Sans Bartle', sans-serif;
 }
 h1 {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'BBH Sans Bartle';
     text-align: center;
     font-size: 50px;
     -webkit-text-stroke: 0.8px black;
@@ -66,6 +66,7 @@ h1 {
     font-family: 'BBH Sans Bartle', sans-serif;
 
 }
+
 
 
 
