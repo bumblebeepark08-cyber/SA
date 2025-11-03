@@ -1,9 +1,9 @@
 @font-face {
   font-family: "FontOne"; /* ตั้งชื่อฟอนต์ตามที่ต้องการ ถ้า FONT_ONE ไม่ทำงาน sans-serif จะทำแทน */
   /* src: url("./BBHSansBartle-Regular.ttf") format("truetype"); */
-  font-family: "BBH Sans Bartle", sans-serif;
-  font-weight: 400;
-  font-style: normal;
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=BBH+Sans+Bartle&family=Bungee&family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Jersey+10&family=Jersey+20+Charted&family=Rubik+80s+Fade&display=swap');
+</style>
 }
 h1 {
     font-family: Arial, Helvetica, sans-serif;
@@ -63,4 +63,5 @@ h1 {
     font-family: "FontOne", sans-serif;
 
 }
+
 
