@@ -1,0 +1,63 @@
+@font-face {
+  font-family: "FONT_ONE", sans-serif; /* ตั้งชื่อฟอนต์ตามที่ต้องการ ถ้า FONT_ONE ไม่ทำงาน sans-serif จะทำแทน */
+  src: url("C:\Users\7180-sa\HTML_PED\Alfa_Slab_One,BBH_Sans_Bartle,Bungee,Google_Sans_Code,Jersey_10\Google_Sans_Code\GoogleSansCode-Italic-VariableFont_wght.ttf") format("woff2"),
+       url("C:\Users\7180-sa\HTML_PED\Alfa_Slab_One,BBH_Sans_Bartle,Bungee,Google_Sans_Code,Jersey_10\Google_Sans_Code\GoogleSansCode-Italic-VariableFont_wght.ttf") format("woff"),
+       url("C:\Users\7180-sa\HTML_PED\Alfa_Slab_One,BBH_Sans_Bartle,Bungee,Google_Sans_Code,Jersey_10\Google_Sans_Code\GoogleSansCode-Italic-VariableFont_wght.ttf") format("truetype"); /* ระบุที่อยู่ของไฟล์ฟอนต์ */
+}
+h1 {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    font-size: 50px;
+    -webkit-text-stroke: 0.8px black;
+}
+#p1 {
+    width: 1500px;
+    height: 550px;
+    border: dashed blue;
+    position: absolute;
+    top: 20;
+}
+#job72 {
+    width: 30px;
+    height: 90px;
+    background-color: aqua;
+    position: relative;
+    top: 20px;
+    left: 5px;      
+}
+#job72 span {
+    writing-mode: vertical-rl; /*เขียนตัวอักษรแนวตั้งจากล่างขึ้นบน */
+    /* text-orientation: mixed;   ให้ตัวอักษรไทยไม่กลับหัว */
+    /* font-family: Arial, Helvetica, sans-serif; */
+    /* font-size: 10px;   */
+    display: inline-block;
+    transform: rotate(180deg);   /* 👈 หมุนตัวอักษรหันหัวไปทางซ้าย */
+    transform-origin: left;    /* หมุนรอบจุดกึ่งกลาง */
+    /* font-family: Arial, Helvetica, sans-serif; */
+    font-size: 8px;
+    margin-left: 20px;
+    margin-top: 6px;
+    font-family: "FONT_ONE", sans-serif;
+}
+#job00 {
+    width: 30px;
+    height: 120px;
+    background-color: red;
+    position: relative;
+    top: 20px;
+    left: 5px;      
+}
+#job00 span {
+    writing-mode: vertical-rl; /*เขียนตัวอักษรแนวตั้งจากล่างขึ้นบน */
+    /* text-orientation: mixed;   ให้ตัวอักษรไทยไม่กลับหัว */
+    /* font-family: Arial, Helvetica, sans-serif; */
+    /* font-size: 20px;   */
+    display: inline-block;
+    transform: rotate(180deg);   /* 👈 หมุนตัวอักษรหันหัวไปทางซ้าย */
+    transform-origin: left;    /* หมุนรอบจุดกึ่งกลาง */
+    /* font-family: Arial, Helvetica, sans-serif; */
+    font-size: 12px;
+    margin-left:20px;
+    margin-top: 6px;
+    font-family: "FONT_ONE", sans-serif;
+}
