@@ -1,8 +1,7 @@
 @font-face {
-  font-family: "FONT_ONE", sans-serif; /* ตั้งชื่อฟอนต์ตามที่ต้องการ ถ้า FONT_ONE ไม่ทำงาน sans-serif จะทำแทน */
-  src: url("C:\Users\7180-sa\HTML_PED\Alfa_Slab_One,BBH_Sans_Bartle,Bungee,Google_Sans_Code,Jersey_10\Google_Sans_Code\GoogleSansCode-Italic-VariableFont_wght.ttf") format("woff2"),
-       url("C:\Users\7180-sa\HTML_PED\Alfa_Slab_One,BBH_Sans_Bartle,Bungee,Google_Sans_Code,Jersey_10\Google_Sans_Code\GoogleSansCode-Italic-VariableFont_wght.ttf") format("woff"),
-       url("C:\Users\7180-sa\HTML_PED\Alfa_Slab_One,BBH_Sans_Bartle,Bungee,Google_Sans_Code,Jersey_10\Google_Sans_Code\GoogleSansCode-Italic-VariableFont_wght.ttf") format("truetype"); /* ระบุที่อยู่ของไฟล์ฟอนต์ */
+  font-family: "FontOne"; /* ตั้งชื่อฟอนต์ตามที่ต้องการ ถ้า FONT_ONE ไม่ทำงาน sans-serif จะทำแทน */
+  src: url("./BBHSansBartle-Regular.ttf") format("truetype");
+
 }
 h1 {
     font-family: Arial, Helvetica, sans-serif;
@@ -37,7 +36,7 @@ h1 {
     font-size: 8px;
     margin-left: 20px;
     margin-top: 6px;
-    font-family: "FONT_ONE", sans-serif;
+    font-family: "FontOne", sans-serif;
 }
 #job00 {
     width: 30px;
@@ -59,5 +58,6 @@ h1 {
     font-size: 12px;
     margin-left:20px;
     margin-top: 6px;
-    font-family: "FONT_ONE", sans-serif;
+    font-family: "FontOne", sans-serif;
+
 }
