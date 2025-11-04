@@ -2,9 +2,12 @@
   /* font-family: "FontOne"; /* ตั้งชื่อฟอนต์ตามที่ต้องการ ถ้า FONT_ONE ไม่ทำงาน sans-serif จะทำแทน */ */
   /* src: url("./BBHSansBartle-Regular.ttf") format("truetype"); */
 /* <style> */
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=BBH+Sans+Bartle&family=Bungee&family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Jersey+10&family=Jersey+20+Charted&family=Rubik+80s+Fade&display=swap" rel="stylesheet">
+/* .bbh-sans-bartle-regular { */
+  /* font-family: "BBH Sans Bartle", sans-serif; */
+  /* font-weight: 400; */
+  /* font-style: normal; */
+/* } */
+
 /* } */
 /* body { */
     /* font-family: 'BBH Sans Bartle', sans-serif; */
@@ -67,6 +70,7 @@ h1 {
     font-family: 'BBH Sans Bartle', sans-serif;
 
 }
+
 
 
 
