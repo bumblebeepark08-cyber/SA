@@ -8,10 +8,12 @@
   /* font-style: normal; */
 /* } */
 
+@import url('https://fonts.googleapis.com/css2?family=BBH+Sans+Bartle&display=swap');
+
 /* } */
-/* body { */
-    /* font-family: 'BBH Sans Bartle', sans-serif; */
-/* } */
+body {
+    font-family: 'BBH Sans Bartle', sans-serif;
+}
 h1 {
     font-family: 'BBH Sans Bartle';
     text-align: center;
@@ -70,6 +72,7 @@ h1 {
     font-family: 'BBH Sans Bartle', sans-serif;
 
 }
+
 
 
 
