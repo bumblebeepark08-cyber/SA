@@ -1,24 +1,21 @@
 /* @font-face { */
-  /* font-family: "FontOne"; /* ตั้งชื่อฟอนต์ตามที่ต้องการ ถ้า FONT_ONE ไม่ทำงาน sans-serif จะทำแทน */ */
+  /* font-family: "FontOne"; */
   /* src: url("./BBHSansBartle-Regular.ttf") format("truetype"); */
-/* <style> */
-/* .bbh-sans-bartle-regular { */
-  /* font-family: "BBH Sans Bartle", sans-serif; */
-  /* font-weight: 400; */
-  /* font-style: normal; */
 /* } */
-
 @import url('https://fonts.googleapis.com/css2?family=BBH+Sans+Bartle&display=swap');
-
+/* @import url('https://fonts.googleapis.com/css2?family=Bitcount+Grid+Single:wght@100..900&display=swap'); */
 /* } */
 body {
     font-family: 'BBH Sans Bartle', sans-serif;
 }
+
 h1 {
-    font-family: 'BBH Sans Bartle';
+    /* font-family: Arial, Helvetica, sans-serif; */
     text-align: center;
     font-size: 50px;
     -webkit-text-stroke: 0.8px black;
+    font-family: "BBH Sans Bartle";
+
 }
 #p1 {
     width: 1500px;
@@ -47,7 +44,7 @@ h1 {
     font-size: 8px;
     margin-left: 20px;
     margin-top: 6px;
-    font-family: 'BBH Sans Bartle', sans-serif;
+    font-family: "BBH Sans Bartle", sans-serif;
 }
 #job00 {
     width: 30px;
@@ -69,20 +66,5 @@ h1 {
     font-size: 12px;
     margin-left:20px;
     margin-top: 6px;
-    font-family: 'BBH Sans Bartle', sans-serif;
-
+    font-family: "BBH Sans Bartle", sans-serif;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
