@@ -1,25 +1,83 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5S Map Layout</title>
+  <meta charset="UTF-8" />
+  <title>Random Image Generator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-    <style>
-        body{
-            margin:0;
-            text-align:center;
-        }
+    html,
+    body {
+      height: 100vh;
+      overflow: hidden;
+      font-family: sans-serif;
+      background-color: #fcfcfc;
+      color: #fff;
+    }
 
-        img{
-            width:100%;
-            height:auto;
-        }
-    </style>
+    .container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .image-wrapper {
+      position: relative;
+      display: inline-block;
+      max-width: 100vw;
+      max-height: 80vh;
+      text-align: center;
+    }
+
+    img {
+      max-width: 100vw;
+      max-height: 80vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      color: rgb(0, 0, 0);
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 18px;
+      line-height: 24px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .speaker-text {
+      font-size: 18px;
+      color: #0f0;
+      margin-bottom: 10px;
+    }
+
+    button {
+      margin: 10px;
+      padding: 10px 10px;
+      font-size: 20px;
+      border: none;
+      border-radius: 6px;
+      background-color: crimson;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: darkred;
+    }
+  </style>
 </head>
-<body>
-
-    <img src="images/Layout.png">
-    
-</body>
-</html>
