@@ -86,3 +86,26 @@
       var randomImage = [
         'KYT1.png',
 ];
+        // ข้อความอยู่ด้านบนรูป
+      var html = `
+        <div class="image-wrapper">
+          <h1 class="close-btn" onclick="hideImage()">✖</h1>
+          <p class="speaker-text">${speaker}</p>
+          <img src="${randomImage[number]}" alt="Random KYT Image" sytle="display:block; margin:0 auto;"/>
+        </div>
+      `;
+      document.getElementById('result').innerHTML = html;
+    }
+
+    function startRandom() {
+      getRandomImage();
+    }
+
+    function hideImage() {
+      document.getElementById('result').innerHTML = '';
+    }
+  </script>
+</body>
+
+
+</html>
