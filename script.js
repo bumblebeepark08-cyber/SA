@@ -1,10 +1,14 @@
-  function openNav() {
-   document.getElementById("bar").classList.add("active");
-  }
-  function closeNav() {
-   document.getElementById("bar").classList.remove("active");
-  }
+function openNav() {
+    document.getElementById("bar").classList.add("active");
+}
 
+function closeNav() {
+    document.getElementById("bar").classList.remove("active");
+}
+
+function loadPage(page) {
+    document.querySelector(".foriframe").src = page;
+}
   // function openNav() {
   //  document.getElementById("bar").style.display = "block";
   //  document.getElementById("bar").style.right = "0";
