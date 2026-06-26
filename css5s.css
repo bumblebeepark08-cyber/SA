@@ -5,13 +5,13 @@ body{
 }
 
 .header{
-    height:100px;
-    background:#050505;
-    color:white;
+    width:100%;
+    background:#000;
     display:flex;
-    align-items:center;
     justify-content:space-between;
-    padding:0 25px;
+    align-items:center;
+    padding:10px 20px;
+    box-sizing:border-box;
 }
 
 .header h1{
