@@ -472,3 +472,17 @@ body {
     transform:scale(1.1);
     box-shadow:0 0 15px rgba(185,107,197,.6);
 }
+.btn-Plan5s {
+    position: absolute;
+    top: 200px;
+    right: 180px;
+    width: 170px;
+    height: 45px;
+    background: #0066ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
