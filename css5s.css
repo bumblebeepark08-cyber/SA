@@ -445,11 +445,39 @@ body {
     cursor: pointer;
 }
 
-.btn-Plan5s {
+.btn-Plan5S {
     position: absolute;
-    top: 200px;
-    right: 180px;
-    width: 170px;
+    top: 650px;
+    left: 120px;
+    width: 450px;
+    height: 45px;
+    background: #0066ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.btn-Action {
+    position: absolute;
+    top: 650px;
+    left: 800px;
+    width: 450px;
+    height: 45px;
+    background: #0066ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.btn-Selfeva {
+    position: absolute;
+    top: 650px;
+    left: 1450px;
+    width: 450px;
     height: 45px;
     background: #0066ff;
     color: white;
