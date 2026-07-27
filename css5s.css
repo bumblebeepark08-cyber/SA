@@ -448,7 +448,7 @@ body {
 .btn-Back{
     position:absolute;
     top:10px;
-    left:180px;
+    left:20px;
     z-index:9999;
 
     width:50px;
