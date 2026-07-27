@@ -12,17 +12,17 @@ body {
    ========================================== */
 .header {
     height: 70px;
-    width: 100%; /* ยืดความกว้างให้เต็มจอพอดี */
-    max-width: 1688px; /* ล็อกไว้ไม่ให้เกินจอทีวี */
+    width: 100%;             /* สั่งให้ยืดเต็ม 100% */
+    max-width: none;         /* ปลดล็อกขีดจำกัดความกว้าง */
     background: #112f79;
     color: white;
     display: flex;
     align-items: center;
-    justify-content: flex-end; /* กล่องสถานะชิดขวา */
+    justify-content: flex-end; 
     padding: 0 25px;
     position: relative;
-    box-sizing: border-box; /* ป้องกันไม่ให้ padding ดันจนทะลุจอ */
-    margin: 0 auto; /* จัดให้อยู่กึ่งกลาง */
+    box-sizing: border-box;
+    margin: 0;               /* ตั้งค่า margin เป็น 0 เพื่อให้ชิดขอบจอพอดี */
 }
 
 .header h1 {
@@ -47,16 +47,18 @@ body {
 }
 
 .title {
-    margin: 15px auto;
-    width: 100%; /* ยืดความกว้างให้เต็มจอ */
-    max-width: 1658px; /* เผื่อระยะขอบซ้ายขวาเล็กน้อยให้พอดีทีวี */
+    margin: 15px 0;          /* เว้นระยะบน-ล่าง 15px และ ซ้าย-ขวา 0 เพื่อให้ชนขอบ */
+    width: 100%;             /* สั่งให้ยืดเต็ม 100% */
+    max-width: none;         /* ปลดล็อกขีดจำกัดความกว้าง */
     padding: 20px;
     background: rgb(236, 239, 147);
     border: 2px solid #aaa;
+    border-left: none;       /* เอาเส้นขอบซ้ายออกเพื่อความสวยงามเวลาเต็มจอ */
+    border-right: none;      /* เอาเส้นขอบขวาออกเพื่อความสวยงามเวลาเต็มจอ */
     text-align: center;
     font-size: 28px;
     font-weight: bold;
-    box-sizing: border-box; /* ป้องกันไม่ให้ padding ดันจนทะลุจอ */
+    box-sizing: border-box; 
 }
 /* จัดกล่องให้อยู่ตรงกลาง */
 .header99 {
