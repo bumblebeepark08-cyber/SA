@@ -342,7 +342,7 @@ body {
    ========================================== */
 .btn-kyt {
     position: absolute;
-    top: 100px;
+    top: 120px;
     left: 20px;
     width: 170px;
     height: 45px;
@@ -357,7 +357,7 @@ body {
 
 .btn-3pillars {
     position: absolute;
-    top: 100px;
+    top: 120px;
     left: 210px;
     width: 170px;
     height: 45px;
