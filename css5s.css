@@ -11,8 +11,9 @@ body {
    2. HEADER & NAVIGATION
    ========================================== */
 .header {
-    height: 90px;
-    width: 3000px;
+    height: 70px;
+    width: 100%; /* ยืดความกว้างให้เต็มจอพอดี */
+    max-width: 1688px; /* ล็อกไว้ไม่ให้เกินจอทีวี */
     background: #112f79;
     color: white;
     display: flex;
@@ -20,6 +21,8 @@ body {
     justify-content: flex-end; /* กล่องสถานะชิดขวา */
     padding: 0 25px;
     position: relative;
+    box-sizing: border-box; /* ป้องกันไม่ให้ padding ดันจนทะลุจอ */
+    margin: 0 auto; /* จัดให้อยู่กึ่งกลาง */
 }
 
 .header h1 {
@@ -33,6 +36,7 @@ body {
     font-weight: bold;
     white-space: nowrap;
 }
+
 #currentDateTime {
     position: absolute;
     top: 12px;
@@ -43,15 +47,16 @@ body {
 }
 
 .title {
-    margin: 15px;
-    height: 40px;
-    width: 3000px;
+    margin: 15px auto;
+    width: 100%; /* ยืดความกว้างให้เต็มจอ */
+    max-width: 1658px; /* เผื่อระยะขอบซ้ายขวาเล็กน้อยให้พอดีทีวี */
     padding: 20px;
     background: rgb(236, 239, 147);
     border: 2px solid #aaa;
     text-align: center;
     font-size: 28px;
     font-weight: bold;
+    box-sizing: border-box; /* ป้องกันไม่ให้ padding ดันจนทะลุจอ */
 }
 /* จัดกล่องให้อยู่ตรงกลาง */
 .header99 {
