@@ -335,6 +335,10 @@ body {
 .arrow-gray {
     --arrow-color: #5f6161;
     --text-color: white;
+
+.arrow-orange {
+    --arrow-color: #5f6161;
+    --text-color: white;
 }
 
 /* ==========================================
@@ -342,7 +346,7 @@ body {
    ========================================== */
 .btn-kyt {
     position: absolute;
-    top: 100px;
+    top: 120px;
     left: 20px;
     width: 170px;
     height: 45px;
@@ -357,7 +361,7 @@ body {
 
 .btn-3pillars {
     position: absolute;
-    top: 100px;
+    top: 120px;
     left: 210px;
     width: 170px;
     height: 45px;
@@ -447,7 +451,7 @@ body {
 
 .btn-Plan5S {
     position: absolute;
-    top: 650px;
+    top: 720px;
     left: 120px;
     width: 450px;
     height: 45px;
@@ -461,8 +465,8 @@ body {
 }
 .btn-Action {
     position: absolute;
-    top: 650px;
-    left: 800px;
+    top: 720px;
+    left: 850px;
     width: 450px;
     height: 45px;
     background: #0066ff;
@@ -475,8 +479,8 @@ body {
 }
 .btn-Selfeva {
     position: absolute;
-    top: 650px;
-    left: 1450px;
+    top: 720px;
+    left: 1600px;
     width: 450px;
     height: 45px;
     background: #0066ff;
