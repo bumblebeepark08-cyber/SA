@@ -342,7 +342,7 @@ body {
    ========================================== */
 .btn-kyt {
     position: absolute;
-    top: 120px;
+    top: 100px;
     left: 20px;
     width: 170px;
     height: 45px;
@@ -357,7 +357,7 @@ body {
 
 .btn-3pillars {
     position: absolute;
-    top: 120px;
+    top: 100px;
     left: 210px;
     width: 170px;
     height: 45px;
@@ -447,7 +447,7 @@ body {
 
 .btn-Plan5S {
     position: absolute;
-    top: 720px;
+    top: 650px;
     left: 120px;
     width: 450px;
     height: 45px;
@@ -461,8 +461,8 @@ body {
 }
 .btn-Action {
     position: absolute;
-    top: 720px;
-    left: 850px;
+    top: 650px;
+    left: 800px;
     width: 450px;
     height: 45px;
     background: #0066ff;
@@ -475,8 +475,8 @@ body {
 }
 .btn-Selfeva {
     position: absolute;
-    top: 720px;
-    left: 1600px;
+    top: 650px;
+    left: 1450px;
     width: 450px;
     height: 45px;
     background: #0066ff;
