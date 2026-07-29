@@ -1,9 +1,5 @@
 const data = [
-    {area:"4-4", type:"Fault", detail:"Part List ไม่ตรง"},
-    {area:"4-5", type:"Fault", detail:"Part List ไม่ตรง"},
-    {area:"5-7", type:"Fault", detail:"โต๊ะไม่ตรง Lay Out"},
-    {area:"5-8", type:"Fault", detail:"ฟิล์มและม่านบังแสงกระจกชำรุด"},
-    {area:"7-3", type:"Fault", detail:"ตู้วางไม่ตรง Lay Out"}
+    {area:"-", type:"Fault", detail:"-"},
 ];
 
 function loadDashboard(){
