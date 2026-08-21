@@ -10,7 +10,7 @@ body {
 /* ==========================================
    2. HEADER & NAVIGATION
    ========================================== */
-.header99 {
+.header, .header99 {
     height: 90px;
     width: 100%;
     background: #112f79;
@@ -24,7 +24,7 @@ body {
     margin: 0; 
 }
 
-.header99 h1 {
+.header h1, .header99 h1 {
     position: absolute;
     left: 50%;
     top: 50%;
@@ -36,43 +36,246 @@ body {
     white-space: nowrap;
 }
 
-/* ==========================================
-   3. BUTTON CONTROL PANEL (ปุ่มสีน้ำเงิน)
-   ========================================== */
-/* สไตล์หลักสำหรับทุกปุ่ม */
-.btn-LayoutDetail, .btn-Role, .btn-Rotation, 
-.btn-Itemlist, .btn-Kaizen, .btn-Plan5S, 
-.btn-Action, .btn-Selfeva {
+#currentDateTime {
     position: absolute;
+    top: 12px;
+    right: 350px;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* จัดกลุ่มปุ่มมุมซ้ายบนให้อยู่ใน Header หน้า Index */
+.nav-group {
+    display: flex;
+    gap: 15px;
+    margin-right: auto; /* ดันให้กลุ่มปุ่มชิดซ้ายสุดของ Header */
+    z-index: 100;
+}
+
+.title, .title1 {
+    margin: 15px 0; 
+    width: 100%; 
+    padding: 20px;
+    background: rgb(236, 239, 147);
+    border: 2px solid #aaa;
+    border-left: none; 
+    border-right: none; 
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    box-sizing: border-box; 
+}
+
+/* ==========================================
+   3. STATUS CARDS (กล่องสถานะมุมขวาบน)
+   ========================================== */
+.status-box {
+    display: flex;
+    gap: 10px;
+}
+
+.card {
+    width: 80px;
+    height: 50px;
+    padding: 8px;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.alarm { background: red; animation: alarmGlow 1s infinite alternate; }
+.warning { background: #ffd500; color: black; animation: warningGlow 1s infinite alternate; }
+.normal { background: #00a651; animation: normalGlow 1s infinite alternate; }
+
+@keyframes alarmGlow { from { box-shadow: 0 0 5px red; } to { box-shadow: 0 0 25px red, 0 0 45px yellow; } }
+@keyframes warningGlow { from { box-shadow: 0 0 5px yellow; } to { box-shadow: 0 0 25px yellow, 0 0 45px orange; } }
+@keyframes normalGlow { from { box-shadow: 0 0 5px #00ff66; } to { box-shadow: 0 0 25px #00ff66, 0 0 45px cyan; } }
+
+/* ==========================================
+   4. MAIN LAYOUT & ZONES (รูปทรง โต๊ะ และพื้นที่)
+   ========================================== */
+.main {
+    display: flex;
+    gap: 15px;
+    padding: 0 15px 15px;
+    position: relative;
+    align-items: flex-start;
+}
+
+.layout {
+    position: relative;
+    width: 2005px;
+    height: 800px;
+    background: white;
+    border: 2px dashed red;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.right-panel { position: relative; flex-shrink: 0; }
+.right-group { display: flex; gap: 3px; align-items: flex-start; }
+
+.blue-zone { width: 150px; height: 795px; background: blue; }
+.yellow-zone { width: 150px; height: 795px; background: yellow; }
+
+.side {
+    background: #9bd45a;
+    border: 3px solid orange;
+    position: relative;
+    padding: 10px;
+    height: 795px;
+    width: 710px;
+    box-sizing: border-box;
+}
+
+.side h2 {
+    writing-mode: vertical-rl;
+    position: absolute;
+    left: 300px;
+    top: 250px;
+}
+
+.area {
+    position: absolute;
+    border: 1px solid #333;
+    background: #eee;
+    padding: 8px;
+    text-align: center;
+    font-size: 13px;
+    z-index: 10;
+}
+
+.tag {
+    position: absolute;
+    padding: 5px 12px;
+    border: 1px solid #333;
+    font-weight: bold;
+    border-radius: 3px;
+}
+
+.legend { display: flex; gap: 30px; padding: 15px; font-size: 16px; }
+
+/* ==========================================
+   5. ALARM LIST TABLE (ตารางด้านล่างซ้าย)
+   ========================================== */
+.alarm-list {
+    background: #050505;
+    color: white;
+    padding: 15px;
+    position: relative;
+    right: 2020px;
+    top: 30px;
+    width: 560px;
+}
+
+.alarm-title { color: red; font-size: 15px; }
+
+.alarm-list table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+.alarm-list th, .alarm-list td {
+    border: 1px solid #555;
+    padding: 5px;
+}
+
+/* ==========================================
+   6. ARROW TAGS (ป้ายแท็กชี้ตำแหน่ง)
+   ========================================== */
+.arrow-tag {
+    position: absolute;
+    z-index: 999;
+    width: 45px;
+    height: 25px;
+    background: var(--arrow-color);
+    color: var(--text-color);
+    border: 4px solid #333;
+    text-align: center;
+    line-height: 25px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.arrow-tag::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -32px;
+    transform: translateX(-50%);
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-top: 32px solid #333;
+}
+
+.arrow-tag::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -24px;
+    transform: translateX(-50%);
+    border-left: 13px solid transparent;
+    border-right: 13px solid transparent;
+    border-top: 24px solid var(--arrow-color);
+    z-index: 1;
+}
+
+.arrow-purple { --arrow-color: #d47ad4; --text-color: black; }
+.arrow-yellow { --arrow-color: yellow; --text-color: black; }
+.arrow-red    { --arrow-color: red; --text-color: white; }
+.arrow-green  { --arrow-color: #00b050; --text-color: white; }
+.arrow-blue   { --arrow-color: #55c8f0; --text-color: black; }
+.arrow-gray   { --arrow-color: #5f6161; --text-color: white; }
+.arrow-orange { --arrow-color: #ff8c00; --text-color: white; }
+
+/* ==========================================
+   7. BUTTON CONTROL PANEL
+   ========================================== */
+/* สไตล์รูปร่างปุ่มโดยรวม */
+.btn-kyt, .btn-3pillars, .btn-LayoutDetail, .btn-Role, .btn-Rotation, 
+.btn-Itemlist, .btn-Kaizen, .btn-Plan5S, .btn-Action, .btn-Selfeva {
     background: #0066ff;
     color: white;
     border: none;
-    border-radius: 6px;
-    font-size: 20px;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.1s;
-    z-index: 100; /* ให้ปุ่มลอยอยู่เหนือรูปภาพ */
 }
 
-/* เอฟเฟกต์เมื่อเอาเมาส์ชี้ */
-.btn-LayoutDetail:hover, .btn-Role:hover, .btn-Rotation:hover, 
-.btn-Itemlist:hover, .btn-Kaizen:hover, .btn-Plan5S:hover, 
-.btn-Action:hover, .btn-Selfeva:hover {
+.btn-kyt:hover, .btn-3pillars:hover, .btn-LayoutDetail:hover, .btn-Role:hover, 
+.btn-Rotation:hover, .btn-Itemlist:hover, .btn-Kaizen:hover, 
+.btn-Plan5S:hover, .btn-Action:hover, .btn-Selfeva:hover {
     background: #004bb5;
     transform: scale(1.03);
 }
 
-/* ตำแหน่งเฉพาะของแต่ละปุ่ม (อิงตามที่คุณออกแบบไว้) */
-.btn-LayoutDetail { top: 120px; left: 550px; width: 170px; height: 45px; }
-.btn-Role         { top: 120px; left: 1600px; width: 170px; height: 45px; }
-.btn-Rotation     { top: 120px; left: 1900px; width: 170px; height: 45px; }
-.btn-Itemlist     { top: 120px; right: 550px; width: 170px; height: 45px; }
-.btn-Kaizen       { top: 120px; right: 180px; width: 170px; height: 45px; }
+/* กลุ่มปุ่มหน้า Index (จัดใน Header) */
+.btn-kyt, .btn-3pillars {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 15px;
+}
 
-.btn-Plan5S       { top: 720px; left: 120px; width: 450px; height: 45px; }
-.btn-Action       { top: 720px; left: 850px; width: 450px; height: 45px; }
-.btn-Selfeva      { top: 720px; left: 1600px; width: 450px; height: 45px; }
+/* กลุ่มปุ่มหน้า Control Board (จัดอิสระลอยเหนือรูปภาพ) */
+.btn-LayoutDetail, .btn-Role, .btn-Rotation, .btn-Itemlist, 
+.btn-Kaizen, .btn-Plan5S, .btn-Action, .btn-Selfeva {
+    position: absolute;
+    border-radius: 6px;
+    z-index: 1000;
+}
+
+.btn-LayoutDetail { top: 120px; left: 550px; width: 170px; height: 45px; font-size: 20px;}
+.btn-Role         { top: 120px; left: 1600px; width: 170px; height: 45px; font-size: 20px;}
+.btn-Rotation     { top: 120px; left: 1900px; width: 170px; height: 45px; font-size: 20px;}
+.btn-Itemlist     { top: 120px; right: 550px; width: 170px; height: 45px; font-size: 20px;}
+.btn-Kaizen       { top: 120px; right: 180px; width: 170px; height: 45px; font-size: 20px;}
+.btn-Plan5S       { top: 720px; left: 120px; width: 450px; height: 45px; font-size: 20px;}
+.btn-Action       { top: 720px; left: 850px; width: 450px; height: 45px; font-size: 20px;}
+.btn-Selfeva      { top: 720px; left: 1600px; width: 450px; height: 45px; font-size: 20px;}
 
 /* ปุ่ม Back */
 .btn-Back {
