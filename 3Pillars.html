@@ -1,120 +1,44 @@
 <!DOCTYPE html>
-
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-
-    <!-- Header -->
-<div class="header99">
-
-    <h99>5S MANAGMENT CONTROL BORAD</h99>
-
-</div>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5S Management Control Board</title>
+    <!-- โหลด CSS ไว้ใน head ให้ถูกต้อง -->
     <link rel="stylesheet" href="css5s.css">
 </head>
-
-<button class="btn-LayoutDetail" onclick="window.location.href='LayoutDetail.html'">
-    Layout
-</button>
-
-<button class="btn-บทบาทหน้าที่" onclick="window.location.href='Role.html'">
-    บทบาทหน้าที่
-</button>
-
-<button class="btn-Rotation" onclick="window.location.href='Rotation.html'">
-    Rotation Plan
-</button>
-
-<button class="btn-Itemlist" onclick="window.location.href='Itemlist.html'">
-    Item List5S 
-</button>
-
-<button class="btn-Kaizen" onclick="window.location.href='Kaizen.html'">
-    Kaizen Report
-</button>
-
-<button class="btn-Back" onclick="window.location.href='index.html'">
-    Back
-</button>
-
-<button class="btn-Plan5S" onclick="window.location.href='Plan5S.html'">
-    Plan 5S Machine Making And AI
-</button>
-
-<button class="btn-Action" onclick="window.location.href='ActionPlan.html'">
-    Action Plan 5S
-</button>
-<button class="btn-Selfeva" onclick="window.location.href='Selfeva.html'">
-    Self Eva
-</button>
-    
-
 <body>
 
-<!-- เนื้อหา -->
+    <!-- Header -->
+    <div class="header99">
+        <h1>5S MANAGMENT CONTROL BOARD</h1>
+    </div>
 
-<div style="padding:20px;">
+    <!-- Navigation Buttons (ย้ายมาไว้ใน body) -->
+    <div class="nav-buttons">
+        <button class="btn-LayoutDetail" onclick="window.location.href='LayoutDetail.html'">Layout</button>
+        <button class="btn-Role" onclick="window.location.href='Role.html'">บทบาทหน้าที่</button>
+        <button class="btn-Rotation" onclick="window.location.href='Rotation.html'">Rotation Plan</button>
+        <button class="btn-Itemlist" onclick="window.location.href='Itemlist.html'">Item List5S</button>
+        <button class="btn-Kaizen" onclick="window.location.href='Kaizen.html'">Kaizen Report</button>
+        <button class="btn-Back" onclick="window.location.href='index.html'">Back</button>
+        <button class="btn-Plan5S" onclick="window.location.href='Plan5S.html'">Plan 5S Machine Making And AI</button>
+        <button class="btn-Action" onclick="window.location.href='ActionPlan.html'">Action Plan 5S</button>
+        <button class="btn-Selfeva" onclick="window.location.href='Selfeva.html'">Self Eva</button>
+    </div>
 
-    <img src="Layout.png"
-        style="
-        width:50%;
-        position:relative;
-        top:80px;
-        left:10px;
-        ">
-    <img src="Ka.jpg"
-        style="
-        width:10%;
-        position:relative;
-        top:60px;
-        left:30px;
-        ">
-    <img src="Rotation.jpg"
-        style="
-        width:11.5%;
-        position:relative;
-        top:61px;
-        left:50px;
-        "> 
-    <img src="Itemlist1.jpg"
-        style="
-        width:10.7%;
-        position:relative;
-        top:61px;
-        left:70px;
-        ">
-    <img src="KAIZENREPORT.jpg"
-        style="
-        width:12.3%;
-        position:relative;
-        top:61px;
-        left:90px;
-        ">
-    <img src="Plan5S.jpg"
-        style="
-        width:24%;
-        position:relative;
-        top:150px;
-        left:10px;
-        ">
-    <img src="Actionplan.jpg"
-        style="
-        width:24%;
-        position:relative;
-        top:150px;
-        left:30px;
-        ">
-    <img src="Selfeva.jpg"
-        style="
-        width:23.5%;
-        position:relative;
-        top:150px;
-        left:50px;
-        ">
+    <!-- เนื้อหา -->
+    <div style="padding:20px;">
+        <img src="Layout.png" style="width:50%; position:relative; top:80px; left:10px;">
+        <img src="Ka.jpg" style="width:10%; position:relative; top:60px; left:30px;">
+        <img src="Rotation.jpg" style="width:11.5%; position:relative; top:61px; left:50px;"> 
+        <img src="Itemlist1.jpg" style="width:10.7%; position:relative; top:61px; left:70px;">
+        <img src="KAIZENREPORT.jpg" style="width:12.3%; position:relative; top:61px; left:90px;">
+        <img src="Plan5S.jpg" style="width:24%; position:relative; top:150px; left:10px;">
+        <img src="Actionplan.jpg" style="width:24%; position:relative; top:150px; left:30px;">
+        <img src="Selfeva.jpg" style="width:23.5%; position:relative; top:150px; left:50px;">
+    </div>
 
-</div>
-
-<script src="script.js"></script>
-
+    <script src="script.js"></script>
+</body>
 </html>
