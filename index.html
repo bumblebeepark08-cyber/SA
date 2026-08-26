@@ -341,5 +341,113 @@ const positions = {
   "10-10": {x:30,y:300},
 };
  
-</html> 
-
+function createPopup(item){
+  const layout = document.getElementById("layout");
+  const p = positions[item.area];
+  if(!p) return;
+ 
+  let cls = item.type === "Fault" ? "alarm" :
+            item.type === "Komorikoto" ? "warning" : "normal";
+ 
+  let title = item.type === "Fault" ? "ALARM" :
+              item.type === "Komorikoto" ? "WARNING" : "NORMAL";
+ 
+  const pop = document.createElement("div");
+  pop.className = "popup";
+  pop.style.left = p.x + "px";
+  pop.style.top = p.y + "px";
+  pop.style.borderColor = item.type === "Fault" ? "red" :
+                          item.type === "Komorikoto" ? "#ffd500" : "#00b050";
+ 
+  pop.innerHTML = `
+    <div class="head ${cls}">🔔 ${title}</div>
+    <div class="body">
+      <b>${item.area}</b><br>
+      ${item.detail}<br>
+      <b>${item.time}</b>
+    </div>
+  `;
+ 
+  layout.appendChild(pop);
+}
+ 
+function loadDashboard(){
+  let alarm = 0, warning = 0, normal = 0;
+  const tbody = document.querySelector("#alarmTable tbody");
+ 
+  data.forEach(item => {
+    createPopup(item);
+ 
+    if(item.type === "Fault") alarm++;
+    else if(item.type === "Komorikoto") warning++;
+    else if(item.type === "Kaizen") normal++;
+ 
+    const color = item.type === "Fault" ? "🔴" :
+                  item.type === "Komorikoto" ? "🟡" : "🟢";
+ 
+    tbody.innerHTML += `
+      <tr>
+      <td>${item.area}</td>
+      <td>${color} ${item.type}</td>
+      <td>${item.detail}</td>
+    </tr>
+    `;
+  });
+ 
+  document.getElementById("alarmCount").innerText = alarm;
+  document.getElementById("warningCount").innerText = warning;
+  document.getElementById("normalCount").innerText = normal;
+}
+ 
+loadDashboard();
+</script>
+<body>
+ 
+    <!-- Header -->
+    <div class="header">
+        <h1>5S MACHINE LAYOUT</h1>
+ 
+        <!-- ตรงนี้จะแสดงวันเวลา -->
+        <div id="currentDateTime"></div>
+ 
+    </div>
+ 
+    <!-- Layout ทั้งหมด -->
+    <div class="main">
+        ...
+    </div>
+ 
+    <!-- JavaScript ใส่ตรงนี้ -->
+    <script>
+ 
+        function updateDateTime() {
+ 
+            const now = new Date();
+ 
+            const time =
+                now.toLocaleTimeString('en-GB');
+ 
+            const day =
+                String(now.getDate()).padStart(2, '0');
+ 
+            const month =
+                now.toLocaleString('en-US', { month: 'short' });
+ 
+            const year =
+                String(now.getFullYear()).slice(-2);
+ 
+            document.getElementById("currentDateTime").innerHTML =
+                `${time}<br>${day}-${month}-${year}`;
+        }
+ 
+        updateDateTime();
+ 
+        setInterval(updateDateTime, 1000);
+ 
+    </script>
+ 
+</body>
+ 
+ 
+</body>
+</html>
