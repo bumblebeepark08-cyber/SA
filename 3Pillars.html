@@ -4,155 +4,183 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>5S Management Control Board</title>
-    <!-- ลิงก์ไปยังไฟล์ CSS ของคุณ (สามารถย้าย CSS ใน <style> ด้านล่างนี้ไปไว้ในไฟล์ css5s.css ได้) -->
+    <!-- โหลด CSS เดิมของคุณ (แต่เราจะไม่ให้มันมากระทบปุ่มอีกต่อไป) -->
     <link rel="stylesheet" href="css5s.css">
     
     <style>
-        /* รีเซ็ตค่าพื้นฐาน */
-        body { margin: 0; padding: 0; font-family: sans-serif; background-color: #f4f6f9; }
-        
-        /* จัดการ Header */
-        .header99 {
+        /* =========================================
+           โครงสร้างหลัก (Dashboard Layout)
+        ========================================= */
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: Arial, sans-serif; 
+            background-color: #eef2f6; /* สีพื้นหลังให้กล่องสีขาวดูโดดเด่น */
+        }
+
+        /* ส่วนหัว Header */
+        .header-main {
             background-color: #1a2b72;
             color: white;
             text-align: center;
             padding: 15px;
             position: relative;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .header99 h1 { margin: 0; font-size: 24px; }
-        .btn-Back {
+        .header-main h1 { margin: 0; font-size: 24px; text-transform: uppercase; }
+        
+        .btn-back-new {
             position: absolute;
-            left: 15px;
+            left: 20px;
             top: 50%;
-            transform: translateY(-50%); /* ให้อยู่กึ่งกลางแนวตั้งพอดี */
-            background-color: #ddd;
-            color: #333;
+            transform: translateY(-50%);
+            background-color: #ffffff;
+            color: #1a2b72;
             border: none;
-            padding: 10px 15px;
+            padding: 8px 20px;
             border-radius: 5px;
-            cursor: pointer;
             font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        /* โครงสร้างหลัก (Dashboard) */
-        .dashboard-container {
+        /* คอนเทนเนอร์คลุมทั้งหมด */
+        .dashboard-wrap {
+            padding: 0 20px 20px 20px;
             display: flex;
             flex-direction: column;
-            gap: 30px; /* ระยะห่างระหว่างแถวบน-ล่าง */
-            padding: 20px;
-            width: 100%;
-            box-sizing: border-box;
+            gap: 20px; /* ระยะห่างระหว่างแถวบน-ล่าง */
         }
 
-        /* แถวสำหรับเรียงปุ่มและรูปภาพ */
-        .row {
+        /* จัดกลุ่มแถวแนวนอน */
+        .flex-row {
             display: flex;
-            flex-wrap: wrap; /* หากจอเล็กเกินไปจะปัดตกบรรทัดให้อัตโนมัติ */
-            gap: 15px; /* ระยะห่างระหว่างคอลัมน์ */
-            justify-content: center; /* จัดให้อยู่กึ่งกลางหน้าจอ */
-            align-items: flex-start;
+            flex-wrap: nowrap; 
+            gap: 15px; /* ระยะห่างระหว่างกล่อง */
+            justify-content: center;
+            align-items: stretch;
         }
 
-        /* กล่องย่อยสำหรับจับคู่ ปุ่ม + รูปภาพ */
-        .item-box {
+        /* =========================================
+           กล่องการ์ด (ใส่ปุ่ม + รูปภาพ)
+        ========================================= */
+        .card-box {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px; /* ระยะห่างระหว่างปุ่มกับรูป */
+            gap: 15px; /* ระยะห่างระหว่างปุ่มกับรูปภาพ */
         }
 
-        /* สไตล์ปุ่ม */
-        .item-box button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            white-space: nowrap; /* ไม่ให้ข้อความปุ่มขึ้นบรรทัดใหม่ */
-            width: fit-content;
+        /* กำหนดสัดส่วนความกว้างของแต่ละกล่อง */
+        .card-layout { width: 44%; } /* กล่อง Layout ซ้ายบน (ใหญ่สุด) */
+        .card-small { width: 14%; }  /* กล่องเอกสาร 4 อันขวาบน */
+        .card-bottom { width: 32.5%; } /* กล่องเอกสาร 3 อันแถวล่าง */
+
+        /* 
+           บังคับสไตล์ปุ่มใหม่ ล้างค่าเดิมจาก css5s.css แบบเด็ดขาด 
+        */
+        .card-box button {
+            position: static !important;
+            margin: 0 !important;
+            transform: none !important;
+            background-color: #0d6efd !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 15px !important;
+            border-radius: 6px !important;
+            cursor: pointer !important;
+            font-weight: bold !important;
+            font-size: 14px !important;
+            width: auto !important;
+            min-width: 120px !important;
+            text-align: center !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
         }
-        .item-box button:hover { background-color: #0056b3; }
+        .card-box button:hover { background-color: #0b5ed7 !important; }
 
-        /* สไตล์รูปภาพ */
-        .item-box img {
-            width: 100%;
-            height: auto;
-            border: 1px solid #ccc;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-            background-color: white;
+        /* จัดการรูปภาพให้อยู่ในกล่องอย่างสวยงาม */
+        .card-box img {
+            width: 100% !important;
+            height: auto !important;
+            object-fit: contain;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
         }
 
-        /* กำหนดขนาดความกว้างตามสัดส่วน (อิงจากภาพตัวอย่าง image_14c03b.jpg) */
-        .width-layout { width: 42%; } /* ภาพ Layout ใหญ่สุด */
-        .width-small { width: 12%; } /* ภาพ 4 ภาพด้านขวาบน */
-        .width-bottom { width: 31%; } /* ภาพ 3 ภาพแถวล่าง */
-
-        /* สร้าง Responsive กรณีดูผ่านจอที่เล็กลง (Tablet/Mobile) */
-        @media (max-width: 1024px) {
-            .width-layout { width: 100%; }
-            .width-small { width: 22%; }
-            .width-bottom { width: 45%; }
+        /* =========================================
+           Responsive สำหรับจอเล็ก (Tablet / Mobile)
+        ========================================= */
+        @media (max-width: 1200px) {
+            .flex-row { flex-wrap: wrap; }
+            .card-layout { width: 100%; }
+            .card-small { width: 23%; }
+            .card-bottom { width: 48%; }
         }
         @media (max-width: 768px) {
-            .width-small, .width-bottom { width: 100%; }
+            .card-small { width: 47%; }
+            .card-bottom { width: 100%; }
         }
     </style>
 </head>
 <body>
 
     <!-- Header -->
-    <div class="header99">
-        <button class="btn-Back" onclick="window.location.href='index.html'">Back</button>
+    <div class="header-main">
+        <button class="btn-back-new" onclick="window.location.href='index.html'">Back</button>
         <h1>5S MANAGMENT CONTROL BOARD</h1>
     </div>
 
     <!-- ส่วนเนื้อหาหลัก -->
-    <div class="dashboard-container">
+    <div class="dashboard-wrap">
         
-        <!-- แถวบน -->
-        <div class="row">
-            <div class="item-box width-layout">
-                <button class="btn-LayoutDetail" onclick="window.location.href='LayoutDetail.html'">Layout</button>
+        <!-- แถวที่ 1 (บน) -->
+        <div class="flex-row">
+            <div class="card-box card-layout">
+                <button onclick="window.location.href='LayoutDetail.html'">Layout</button>
                 <img src="Layout.jpg" alt="Layout 5S">
             </div>
             
-            <div class="item-box width-small">
-                <button class="btn-Role" onclick="window.location.href='Role.html'">บทบาทหน้าที่</button>
+            <div class="card-box card-small">
+                <button onclick="window.location.href='Role.html'">บทบาทหน้าที่</button>
                 <img src="Ka.jpg" alt="Role">
             </div>
             
-            <div class="item-box width-small">
-                <button class="btn-Rotation" onclick="window.location.href='Rotation.html'">Rotation Plan</button>
+            <div class="card-box card-small">
+                <button onclick="window.location.href='Rotation.html'">Rotation Plan</button>
                 <img src="Rotation.jpg" alt="Rotation Plan">
             </div>
             
-            <div class="item-box width-small">
-                <button class="btn-Itemlist" onclick="window.location.href='Itemlist.html'">Item List 5S</button>
+            <div class="card-box card-small">
+                <button onclick="window.location.href='Itemlist.html'">Item List 5S</button>
                 <img src="Itemlist1.jpg" alt="Item List">
             </div>
             
-            <div class="item-box width-small">
-                <button class="btn-Kaizen" onclick="window.location.href='Kaizen.html'">Kaizen Report</button>
+            <div class="card-box card-small">
+                <button onclick="window.location.href='Kaizen.html'">Kaizen Report</button>
                 <img src="KAIZENREPORT.jpg" alt="Kaizen Report">
             </div>
         </div>
 
-        <!-- แถวล่าง -->
-        <div class="row">
-            <div class="item-box width-bottom">
-                <button class="btn-Plan5S" onclick="window.location.href='Plan5S.html'">Plan 5S Machine Making And AI</button>
+        <!-- แถวที่ 2 (ล่าง) -->
+        <div class="flex-row">
+            <div class="card-box card-bottom">
+                <button onclick="window.location.href='Plan5S.html'">Plan 5S Machine Making And AI</button>
                 <img src="Plan5S.jpg" alt="Plan 5S">
             </div>
             
-            <div class="item-box width-bottom">
-                <button class="btn-Action" onclick="window.location.href='ActionPlan.html'">Action Plan 5S</button>
+            <div class="card-box card-bottom">
+                <button onclick="window.location.href='ActionPlan.html'">Action Plan 5S</button>
                 <img src="Actionplan.jpg" alt="Action Plan">
             </div>
             
-            <div class="item-box width-bottom">
-                <button class="btn-Selfeva" onclick="window.location.href='Selfeva.html'">Self Eva</button>
+            <div class="card-box card-bottom">
+                <button onclick="window.location.href='Selfeva.html'">Self Eva</button>
                 <img src="Selfeva.jpg" alt="Self Eva">
             </div>
         </div>
