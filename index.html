@@ -335,8 +335,13 @@ const data = [
   {area:"4-7ตู้เก็บอุปกรณ์ Safety", type:"Fault", detail:"ตู้เก็บอุปกรณ์เก่า"},
   {area:"6-3เครื่องปริ้น 3D", type:"Fault", detail:"พื้นที่ใหม่อุปกรณ์ไม่ตรงตามมาตรฐาน"},
   {area:"7-2.4ที่จอดรถใส่อุปกรณ์ No.04", type:"Fault", detail:"ยังไม่มีป้ายบ่งชี้"},
-  {area:"5-2โต๊ะประกอบงาน1", type:"Fault", detail:"ยังไม่มีป้ายบ่งชี้"},
+  {area:"ที่จอดรถเข็นใส่อุปกรณ์แบบลื้นชัก No.02", type:"Fault", detail:"ยังไม่มีรถเข็นใส่อุปกรณ์แบบลิ้นชักอยู่ระหว่างรองบ"},
   {area:"7-2.3ที่จอดรถใส่อุปกรณ์ No.03", type:"Fault", detail:"เอกสาร Part listไม่ครบ"},
+  {area:"7-5ที่เก็บเครื่องปริ้นมาร์คสายไฟสว่านไฟฟ้า Rollสายไฟ-สายลม", type:"Fault", detail:"เอกสารไม่ครบ"},
+  {area:"4-6ตู้เก็บของใช้สิ้นเปลือง5", type:"Fault", detail:"Min Stock Order"},
+  {area:"4-5ตู้เก็บของใช้สิ้นเปลือง3-4", type:"Fault", detail:"Min Stock Order"},
+  {area:"6-4แอร์ติดผนัง", type:"Fault", detail:"ยังไม่มีเอกสารเเพลนการล้างแอร์"},
+  {area:"7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลื้นชัก No.03", type:"Fault", detail:"พื้นที่ใหม่ไม่มีเอกสาร"},
 ];
  
 const positions = {
@@ -405,52 +410,5 @@ function loadDashboard(){
 loadDashboard();
 </script>
 <body>
- 
-    <!-- Header -->
-    <div class="header">
-        <h1>5S MACHINE LAYOUT</h1>
- 
-        <!-- ตรงนี้จะแสดงวันเวลา -->
-        <div id="currentDateTime"></div>
- 
-    </div>
- 
-    <!-- Layout ทั้งหมด -->
-    <div class="main">
-        ...
-    </div>
- 
-    <!-- JavaScript ใส่ตรงนี้ -->
-    <script>
- 
-        function updateDateTime() {
- 
-            const now = new Date();
- 
-            const time =
-                now.toLocaleTimeString('en-GB');
- 
-            const day =
-                String(now.getDate()).padStart(2, '0');
- 
-            const month =
-                now.toLocaleString('en-US', { month: 'short' });
- 
-            const year =
-                String(now.getFullYear()).slice(-2);
- 
-            document.getElementById("currentDateTime").innerHTML =
-                `${time}<br>${day}-${month}-${year}`;
-        }
- 
-        updateDateTime();
- 
-        setInterval(updateDateTime, 1000);
- 
-    </script>
- 
-</body>
- 
- 
-</body>
+
 </html>
