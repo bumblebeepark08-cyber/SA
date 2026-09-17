@@ -11,186 +11,84 @@
         box-sizing: border-box;
     }
 
-    body {
+    html, body {
         margin: 0;
-        font-family: Arial, "Tahoma", sans-serif;
-        background: #f4f4f4;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: Arial, Tahoma, sans-serif;
+        background: #ffffff;
     }
 
-    .header {
-        background: #112f79;
-        color: white;
-        padding: 15px 20px;
+    .topbar {
+        height: 55px;
+        background: #12377a;
         display: flex;
         align-items: center;
         justify-content: space-between;
-    }
-
-    .header h1 {
-        margin: 0;
-        font-size: 28px;
-    }
-
-    .back-btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 16px;
-    }
-
-    .info {
-        padding: 10px 20px;
-        background: white;
-        border-bottom: 1px solid #ccc;
-        font-size: 14px;
-    }
-
-    .table-container {
-        width: 100%;
-        height: calc(100vh - 115px);
-        overflow: auto;
-        background: white;
-        padding: 10px;
-    }
-
-    table {
-        border-collapse: collapse;
-        white-space: nowrap;
-        font-size: 13px;
-    }
-
-    td {
-        border: 1px solid #333;
-        padding: 4px 6px;
-        min-width: 45px;
-        height: 26px;
-        text-align: center;
-        background: white;
-    }
-
-    tr:nth-child(6) td {
-        font-weight: bold;
-        background: #0e688d;
+        padding: 0 15px;
         color: white;
     }
 
-    .loading {
-        padding: 30px;
-        font-size: 20px;
-        text-align: center;
+    .topbar h1 {
+        margin: 0;
+        font-size: 22px;
     }
 
-    .error {
-        color: red;
-        padding: 20px;
-        font-weight: bold;
+    .btn {
+        border: none;
+        border-radius: 6px;
+        padding: 9px 18px;
+        font-size: 15px;
+        cursor: pointer;
+    }
+
+    .back {
+        background: white;
+        color: #12377a;
+    }
+
+    .excel {
+        background: #107c41;
+        color: white;
+    }
+
+    .excel-frame {
+        width: 100%;
+        height: calc(100vh - 55px);
+        border: 0;
+        display: block;
+        background: white;
     }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-    <button class="back-btn"
-        onclick="window.location.href='3Pillars.html'">
-        Back
+<div class="topbar">
+
+    <button class="btn back"
+        onclick="window.location.href='index.html'">
+        ← Back
     </button>
 
-    <h1>แผนการทำ 5S</h1>
+    <h1>Plan 5S</h1>
 
-    <div></div>
+    <button class="btn excel"
+        onclick="window.open(
+        'https://aisingroupap01.sharepoint.com/:x:/s/PE-D/IQCrTCZEzWYDTaXG6AtRTX_GAamona61csMx4QK2VBHodLc?e=sv7T6A',
+        '_blank'
+        )">
+        Open Excel
+    </button>
+
 </div>
 
-<div class="info">
-    <span id="status">กำลังโหลดข้อมูล...</span>
-</div>
-
-<div class="table-container">
-    <div id="loading" class="loading">
-        กำลังโหลดข้อมูลจาก Excel...
-    </div>
-
-    <table id="excelTable"></table>
-</div>
-
-<script>
-
-async function loadExcelData() {
-
-    const status = document.getElementById("status");
-    const table = document.getElementById("excelTable");
-    const loading = document.getElementById("loading");
-
-    try {
-
-        const response = await fetch(
-            "data/plan5s.json?t=" + new Date().getTime(),
-            {
-                cache: "no-store"
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error("โหลด plan5s.json ไม่สำเร็จ");
-        }
-
-        const result = await response.json();
-
-        table.innerHTML = "";
-
-        result.data.forEach((row) => {
-
-            const tr = document.createElement("tr");
-
-            row.forEach((value) => {
-
-                const td = document.createElement("td");
-
-                td.textContent = value ?? "";
-
-                tr.appendChild(td);
-
-            });
-
-            table.appendChild(tr);
-
-        });
-
-        loading.style.display = "none";
-
-        const now = new Date();
-
-        status.textContent =
-            "ข้อมูล: " +
-            result.sheetName +
-            " | " +
-            result.rowCount +
-            " แถว × " +
-            result.columnCount +
-            " คอลัมน์ | อัปเดตหน้าเว็บล่าสุด " +
-            now.toLocaleTimeString("th-TH");
-
-    }
-    catch (error) {
-
-        loading.style.display = "none";
-
-        status.innerHTML =
-            '<span class="error">โหลดข้อมูลไม่สำเร็จ: ' +
-            error.message +
-            "</span>";
-
-    }
-
-}
-
-loadExcelData();
-
-/* โหลดข้อมูลใหม่ทุก 60 วินาที */
-setInterval(loadExcelData, 60000);
-
-</script>
+<iframe
+    class="excel-frame"
+    src="https://aisingroupap01.sharepoint.com/:x:/s/PE-D/IQCrTCZEzWYDTaXG6AtRTX_GAamona61csMx4QK2VBHodLc?e=sv7T6A&amp;action=embedview&amp;wdAllowInteractivity=True"
+    frameborder="0">
+</iframe>
 
 </body>
 </html>
