@@ -7,188 +7,291 @@
 <title>Plan 5S</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
+* {
+    box-sizing: border-box;
+}
 
-    body {
-        margin: 0;
-        font-family: Arial, "Tahoma", sans-serif;
-        background: #f4f4f4;
-    }
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, Tahoma, sans-serif;
+    background: #e9edf2;
+}
 
-    .header {
-        background: #112f79;
-        color: white;
-        padding: 15px 20px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
+.topbar {
+    height: 55px;
+    background: #12377a;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+}
 
-    .header h1 {
-        margin: 0;
-        font-size: 28px;
-    }
+.topbar h1 {
+    margin: 0;
+    font-size: 22px;
+}
 
-    .back-btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 16px;
-    }
+.btn {
+    border: 0;
+    border-radius: 6px;
+    padding: 9px 18px;
+    cursor: pointer;
+    font-size: 15px;
+}
 
-    .info {
-        padding: 10px 20px;
-        background: white;
-        border-bottom: 1px solid #ccc;
-        font-size: 14px;
-    }
+.back {
+    background: white;
+    color: #12377a;
+}
 
-    .table-container {
-        width: 100%;
-        height: calc(100vh - 115px);
-        overflow: auto;
-        background: white;
-        padding: 10px;
-    }
+.refresh {
+    background: #107c41;
+    color: white;
+}
 
-    table {
-        border-collapse: collapse;
-        white-space: nowrap;
-        font-size: 13px;
-    }
+.viewer {
+    width: 100%;
+    height: calc(100vh - 55px);
+    overflow: auto;
+    position: relative;
+    background: #d9dde2;
+}
 
-    td {
-        border: 1px solid #333;
-        padding: 4px 6px;
-        min-width: 45px;
-        height: 26px;
-        text-align: center;
-        background: white;
-    }
+.fit-area {
+    position: relative;
+    transform-origin: top left;
+}
 
-    tr:nth-child(6) td {
-        font-weight: bold;
-        background: #0e688d;
-        color: white;
-    }
+.plan-canvas {
+    position: relative;
+    background: white;
+}
 
-    .loading {
-        padding: 30px;
-        font-size: 20px;
-        text-align: center;
-    }
+.background-image {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
 
-    .error {
-        color: red;
-        padding: 20px;
-        font-weight: bold;
-    }
+.overlay-image {
+    position: absolute;
+    object-fit: fill;
+}
+
+.loading {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.2);
+    z-index: 9999;
+}
+
+.status {
+    font-size: 13px;
+}
 </style>
 </head>
 
 <body>
 
-<div class="header">
-    <button class="back-btn"
-        onclick="window.location.href='3Pillars.html'">
-        Back
+<div class="topbar">
+
+    <button class="btn back"
+        onclick="window.location.href='index.html'">
+        ← Back
     </button>
 
-    <h1>แผนการทำ 5S</h1>
+    <h1>Plan 5S</h1>
 
-    <div></div>
-</div>
+    <div>
+        <span class="status" id="status"></span>
 
-<div class="info">
-    <span id="status">กำลังโหลดข้อมูล...</span>
-</div>
-
-<div class="table-container">
-    <div id="loading" class="loading">
-        กำลังโหลดข้อมูลจาก Excel...
+        <button class="btn refresh"
+            onclick="loadPlan5S()">
+            Refresh
+        </button>
     </div>
 
-    <table id="excelTable"></table>
+</div>
+
+<div class="loading" id="loading">
+    กำลังโหลด Plan 5S...
+</div>
+
+<div class="viewer" id="viewer">
+
+    <div class="fit-area" id="fitArea">
+
+        <div class="plan-canvas" id="planCanvas"></div>
+
+    </div>
+
 </div>
 
 <script>
 
-async function loadExcelData() {
+const DATA_URL =
+"https://raw.githubusercontent.com/bumblebeepark08-cyber/SA/data/data/plan5s.json";
 
-    const status = document.getElementById("status");
-    const table = document.getElementById("excelTable");
+let currentWidth = 0;
+let currentHeight = 0;
+
+async function loadPlan5S() {
+
     const loading = document.getElementById("loading");
+    const canvas = document.getElementById("planCanvas");
+    const status = document.getElementById("status");
+
+    loading.style.display = "block";
 
     try {
 
         const response = await fetch(
-            "https://raw.githubusercontent.com/bumblebeepark08-cyber/SA/data/dataplan5s.json?t=" + new Date().getTime()
-            {
-                cache: "no-store"
-            }
+            DATA_URL + "?t=" + Date.now(),
+            { cache: "no-store" }
         );
 
         if (!response.ok) {
-            throw new Error("โหลด plan5s.json ไม่สำเร็จ");
+            throw new Error("ไม่สามารถโหลดข้อมูลได้");
         }
 
         const result = await response.json();
 
-        table.innerHTML = "";
+        currentWidth = result.width;
+        currentHeight = result.height;
 
-        result.data.forEach((row) => {
+        canvas.innerHTML = "";
 
-            const tr = document.createElement("tr");
+        canvas.style.width = result.width + "px";
+        canvas.style.height = result.height + "px";
 
-            row.forEach((value) => {
+        // ภาพตาราง Excel
+        const background = document.createElement("img");
 
-                const td = document.createElement("td");
+        background.className = "background-image";
 
-                td.textContent = value ?? "";
+        background.src =
+            "data:image/png;base64," +
+            result.background;
 
-                tr.appendChild(td);
+        canvas.appendChild(background);
 
-            });
 
-            table.appendChild(tr);
+        // รูปคน / Shape ต่าง ๆ
+        if (Array.isArray(result.overlays)) {
 
-        });
+            result.overlays
+                .sort((a, b) =>
+                    (a.zIndex || 0) - (b.zIndex || 0)
+                )
+                .forEach(item => {
 
-        loading.style.display = "none";
+                    const img =
+                        document.createElement("img");
 
-        const now = new Date();
+                    img.className = "overlay-image";
+
+                    img.src =
+                        "data:image/png;base64," +
+                        item.image;
+
+                    img.style.left =
+                        item.left + "px";
+
+                    img.style.top =
+                        item.top + "px";
+
+                    img.style.width =
+                        item.width + "px";
+
+                    img.style.height =
+                        item.height + "px";
+
+                    canvas.appendChild(img);
+
+                });
+
+        }
+
+        fitToScreen();
 
         status.textContent =
-            "ข้อมูล: " +
-            result.sheetName +
-            " | " +
-            result.rowCount +
-            " แถว × " +
-            result.columnCount +
-            " คอลัมน์ | อัปเดตหน้าเว็บล่าสุด " +
-            now.toLocaleTimeString("th-TH");
+            "Update " +
+            new Date().toLocaleTimeString("th-TH");
+
+        loading.style.display = "none";
 
     }
     catch (error) {
 
-        loading.style.display = "none";
-
-        status.innerHTML =
-            '<span class="error">โหลดข้อมูลไม่สำเร็จ: ' +
-            error.message +
-            "</span>";
+        loading.textContent =
+            "โหลดข้อมูลไม่สำเร็จ: " +
+            error.message;
 
     }
 
 }
 
-loadExcelData();
+
+function fitToScreen() {
+
+    if (!currentWidth || !currentHeight) {
+        return;
+    }
+
+    const viewer =
+        document.getElementById("viewer");
+
+    const fitArea =
+        document.getElementById("fitArea");
+
+    const availableWidth =
+        viewer.clientWidth;
+
+    const scale =
+        Math.min(
+            availableWidth / currentWidth,
+            1
+        );
+
+    fitArea.style.width =
+        currentWidth + "px";
+
+    fitArea.style.height =
+        (currentHeight * scale) + "px";
+
+    fitArea.style.transform =
+        "scale(" + scale + ")";
+
+}
+
+
+window.addEventListener(
+    "resize",
+    fitToScreen
+);
+
+
+/* โหลดครั้งแรก */
+loadPlan5S();
+
 
 /* โหลดข้อมูลใหม่ทุก 60 วินาที */
-setInterval(loadExcelData, 60000);
+setInterval(
+    loadPlan5S,
+    60000
+);
 
 </script>
 
