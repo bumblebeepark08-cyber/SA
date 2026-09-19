@@ -7,59 +7,69 @@
 <title>Plan 5S</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
+*{
+    box-sizing:border-box;
+}
 
-    html, body {
-        margin: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        font-family: Arial, Tahoma, sans-serif;
-        background: #ffffff;
-    }
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    font-family:Arial,Tahoma,sans-serif;
+    background:#dfe3e8;
+}
 
-    .topbar {
-        height: 55px;
-        background: #12377a;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 15px;
-        color: white;
-    }
+.topbar{
+    height:55px;
+    background:#12377a;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 15px;
+}
 
-    .topbar h1 {
-        margin: 0;
-        font-size: 22px;
-    }
+.topbar h1{
+    margin:0;
+    font-size:22px;
+}
 
-    .btn {
-        border: none;
-        border-radius: 6px;
-        padding: 9px 18px;
-        font-size: 15px;
-        cursor: pointer;
-    }
+button{
+    border:0;
+    border-radius:6px;
+    padding:8px 16px;
+    cursor:pointer;
+}
 
-    .back {
-        background: white;
-        color: #12377a;
-    }
+#viewer{
+    width:100%;
+    height:calc(100vh - 55px);
+    overflow:auto;
+    position:relative;
+}
 
-    .excel {
-        background: #107c41;
-        color: white;
-    }
+#canvas{
+    position:relative;
+    transform-origin:top left;
+    background:white;
+}
 
-    .excel-frame {
-        width: 100%;
-        height: calc(100vh - 55px);
-        border: 0;
-        display: block;
-        background: white;
-    }
+#canvas img{
+    position:absolute;
+}
+
+#status{
+    position:fixed;
+    top:70px;
+    left:50%;
+    transform:translateX(-50%);
+    padding:12px 20px;
+    background:white;
+    border-radius:8px;
+    box-shadow:0 2px 10px rgba(0,0,0,.25);
+    z-index:99999;
+    font-size:16px;
+}
 </style>
 </head>
 
@@ -67,28 +77,222 @@
 
 <div class="topbar">
 
-    <button class="btn back"
-        onclick="window.location.href='index.html'">
-        ← Back
-    </button>
+<button onclick="location.href='index.html'">
+← Back
+</button>
 
-    <h1>Plan 5S</h1>
+<h1>Plan 5S</h1>
 
-    <button class="btn excel"
-        onclick="window.open(
-        'https://aisingroupap01.sharepoint.com/:x:/s/PE-D/IQCrTCZEzWYDTaXG6AtRTX_GAamona61csMx4QK2VBHodLc?e=sv7T6A',
-        '_blank'
-        )">
-        Open Excel
-    </button>
+<button onclick="loadPlan5S()">
+Refresh
+</button>
 
 </div>
 
-<iframe
-    class="excel-frame"
-    src="https://aisingroupap01.sharepoint.com/:x:/s/PE-D/IQCrTCZEzWYDTaXG6AtRTX_GAamona61csMx4QK2VBHodLc?e=sv7T6A&amp;action=embedview&amp;wdAllowInteractivity=True"
-    frameborder="0">
-</iframe>
+<div id="status">
+กำลังโหลดข้อมูล...
+</div>
+
+<div id="viewer">
+    <div id="canvas"></div>
+</div>
+
+
+<script>
+
+const API_URL =
+"https://api.github.com/repos/bumblebeepark08-cyber/SA/contents/data/plan5s.json?ref=data";
+
+async function loadPlan5S(){
+
+    const status =
+        document.getElementById("status");
+
+    const canvas =
+        document.getElementById("canvas");
+
+    status.style.display="block";
+    status.innerText="กำลังโหลด Plan 5S...";
+
+    try{
+
+        const response =
+            await fetch(API_URL,{
+                cache:"no-store",
+                headers:{
+                    "Accept":"application/vnd.github+json"
+                }
+            });
+
+        if(!response.ok){
+            throw new Error(
+                "GitHub API Error : " +
+                response.status
+            );
+        }
+
+        const githubFile =
+            await response.json();
+
+        if(!githubFile.content){
+            throw new Error(
+                "ไม่พบข้อมูล content ใน GitHub"
+            );
+        }
+
+        /*
+        GitHub API ส่งไฟล์กลับมาเป็น Base64
+        */
+        const base64 =
+            githubFile.content.replace(/\n/g,"");
+
+        const binary =
+            atob(base64);
+
+        const bytes =
+            new Uint8Array(binary.length);
+
+        for(let i=0;i<binary.length;i++){
+            bytes[i]=binary.charCodeAt(i);
+        }
+
+        const jsonText =
+            new TextDecoder("utf-8").decode(bytes);
+
+        const result =
+            JSON.parse(jsonText);
+
+
+        if(!result.background){
+            throw new Error(
+                "ไม่พบ background ใน plan5s.json"
+            );
+        }
+
+
+        canvas.innerHTML="";
+
+        canvas.style.width =
+            result.width+"px";
+
+        canvas.style.height =
+            result.height+"px";
+
+
+        /*
+        ภาพ Excel หลัก
+        */
+        const bg =
+            document.createElement("img");
+
+        bg.src =
+            "data:image/png;base64," +
+            result.background;
+
+        bg.style.left="0px";
+        bg.style.top="0px";
+        bg.style.width =
+            result.width+"px";
+
+        bg.style.height =
+            result.height+"px";
+
+        bg.style.zIndex="1";
+
+        canvas.appendChild(bg);
+
+
+        /*
+        รูปพนักงาน / Shape
+        */
+        if(Array.isArray(result.overlays)){
+
+            result.overlays
+            .sort(
+                (a,b)=>
+                (a.zIndex||0)-
+                (b.zIndex||0)
+            )
+            .forEach((item,index)=>{
+
+                if(!item.image){
+                    return;
+                }
+
+                const img =
+                    document.createElement("img");
+
+                img.src =
+                    "data:image/png;base64," +
+                    item.image;
+
+                img.style.left =
+                    item.left+"px";
+
+                img.style.top =
+                    item.top+"px";
+
+                img.style.width =
+                    item.width+"px";
+
+                img.style.height =
+                    item.height+"px";
+
+                img.style.zIndex =
+                    String(index+10);
+
+                canvas.appendChild(img);
+
+            });
+
+        }
+
+
+        /*
+        Fit ตามความกว้างหน้าจอ
+        */
+        const viewer =
+            document.getElementById("viewer");
+
+        const scale =
+            Math.min(
+                viewer.clientWidth /
+                result.width,
+                1
+            );
+
+        canvas.style.transform =
+            "scale("+scale+")";
+
+        status.innerText =
+            "โหลดสำเร็จ ✓";
+
+        setTimeout(()=>{
+            status.style.display="none";
+        },1500);
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        status.innerText =
+            "ERROR : " +
+            error.message;
+
+        status.style.color="red";
+
+    }
+
+}
+
+
+loadPlan5S();
+
+/*
+ทดสอบก่อน ยังไม่ Auto refresh
+*/
+</script>
 
 </body>
 </html>
