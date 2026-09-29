@@ -156,10 +156,34 @@
                 <img src="Rotation.jpg" alt="Rotation Plan">
             </div>
             
-            <div class="card-box card-small">
-                <button onclick="window.location.href='Itemlist.html'">Item List 5S</button>
-                <img src="Itemlist1.jpg" alt="Item List">
-            </div>
+<div class="card-box card-small">
+    <button onclick="window.location.href='Itemlist.html'">
+        Item List 5S
+    </button>
+
+    <div style="position: relative; width: 100%;">
+        <img
+            src="Itemlist1.jpg"
+            alt="Item List"
+            style="display: block; width: 100%; height: auto;"
+        >
+
+        <span style="
+            position: absolute;
+            top: 70%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            color: #ed1515;
+            font-family: Arial, sans-serif;
+            font-size: clamp(36px, 5vw, 90px);
+            font-weight: 900;
+            line-height: 1;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 2;
+        ">WAIT</span>
+    </div>
+</div>
             
             <div class="card-box card-small">
                 <button onclick="window.location.href='Kaizen.html'">Kaizen Report</button>
