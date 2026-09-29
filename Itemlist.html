@@ -1,40 +1,30 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <title>Layout Detail</title>
+<div class="item-image">
+  <img src="itemlist1.jpg" alt="Item List 5S">
+  <span class="wait-text">WAIT Update</span>
+</div>
 
-    <style>
-        body{
-            margin:0;
-            background:#f4f4f4;
-            text-align:center;
-            font-family:Arial;
-        }
+<style>
+.item-image {
+  position: relative;
+}
 
-        h1{
-            background:#112f79;
-            color:white;
-            margin:0;
-            padding:20px;
-        }
+.item-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 
-        img{
-            width:95%;
-            margin-top:20px;
-        }
-    </style>
-</head>
-
-<button class="btn-Back" onclick="window.location.href='3Pillars.html'">
-    Back
-</button>
-
-<body>
-
-<h1>ItemList 5S</h1>
-
-<img src="Itemlist1.jpg">
-
-</body>
-</html>
+.wait-text {
+  position: absolute;
+  top: 90%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  color: #ed1515;
+  font-family: Arial, sans-serif;
+  font-size: clamp(36px, 5vw, 90px);
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 2;
+}
+</style>
