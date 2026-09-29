@@ -2,39 +2,70 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Layout Detail</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บทบาทหน้าที่พนักงาน</title>
 
     <style>
-        body{
-            margin:0;
-            background:#f4f4f4;
-            text-align:center;
-            font-family:Arial;
+        * {
+            box-sizing: border-box;
         }
 
-        h1{
-            background:#112f79;
-            color:white;
-            margin:0;
-            padding:20px;
+        body {
+            margin: 0;
+            background: #f4f4f4;
+            text-align: center;
+            font-family: Arial, sans-serif;
         }
 
-        img{
-            width:50%;
-            margin-top:20px;
+        h1 {
+            background: #112f79;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .btn-Back {
+            display: block;
+            margin: 10px;
+            padding: 8px 18px;
+            cursor: pointer;
+        }
+
+        .image-container {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+            padding: 20px;
+            align-items: start;
+        }
+
+        .image-container img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 768px) {
+            .image-container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 
-<button class="btn-Back" onclick="window.location.href='3Pillars.html'">
-    Back
-</button>
-
 <body>
 
-<h1>บทบาทหน้าที่พนักงาน</h1>
+    <button class="btn-Back"
+            onclick="window.location.href='3Pillars.html'">
+        Back
+    </button>
 
-<img src="Ka.jpg">
+    <h1>บทบาทหน้าที่พนักงาน</h1>
+
+    <div class="image-container">
+        <img src="Ka.jpg" alt="บทบาทหน้าที่พนักงาน รูปที่ 1">
+        <img src="Ja.jpg" alt="บทบาทหน้าที่พนักงาน รูปที่ 2">
+    </div>
 
 </body>
 </html>
