@@ -10,7 +10,7 @@
     1. แก้รายการสิ่งผิดปกติที่ const data ด้านล่าง
     2. แก้ชื่อ / ตำแหน่งที่ฟังก์ชัน drawOffice, drawWorkshop, drawAssembly
     3. x, y, width, height เป็นพิกัดบนแผนผัง 3200 × 1120
-    4. สีลูกศรเป็นกลุ่มอุปกรณ์ตามภาพ ไม่ใช่สีสถานะ Fault / Kaizen
+    4. สีลูกศรเป็นกลุ่มอุปกรณ์ตามภาพ ไม่ใช่สีสถานะ Countermeasure / Kaizen
     5. ข้อมูลใน data เป็นข้อมูลจาก HTML ต้นฉบับ ไม่ได้เชื่อมข้อมูลออนไลน์อัตโนมัติ
     หมายเหตุจากภาพอ้างอิง:
     - รหัส 6-2 ใช้ทั้งบอร์ด STW และ Training Unit ตามภาพ
@@ -26,8 +26,7 @@
       --line: #d6dce6;
       --ink: #172434;
       --muted: #586579;
-      --fault: #d92532;
-      --warning: #9b7100;
+      --countermeasure: #d92532;
       --kaizen: #007c4e;
     }
     * { box-sizing: border-box; }
@@ -68,7 +67,7 @@
     .legend { display: flex; flex-wrap: wrap; gap: 14px; }
     .legend span { display: inline-flex; align-items: center; gap: 5px; }
     .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
-    .dot-Countermeasure { background: #d92532; }
+    .dot-countermeasure { background: #d92532; }
     .dot-kaizen { background: #00a861; }
     .alarm-section { margin-top: 16px; }
     .alarm-head { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; padding: 14px; }
@@ -85,8 +84,7 @@
     th:nth-child(1) { width: 40%; }
     th:nth-child(2) { width: 150px; }
     .status-label { display: inline-flex; align-items: center; gap: 7px; font-weight: bold; white-space: nowrap; }
-    .status-fault { color: var(--fault); }
-    .status-warning { color: var(--warning); }
+    .status-countermeasure { color: var(--countermeasure); }
     .status-kaizen { color: var(--kaizen); }
     .empty { padding: 22px; text-align: center; color: var(--muted); }
     dialog { width: min(540px, calc(100% - 28px)); max-height: 85vh; overflow: auto; padding: 24px; border: 0; border-radius: 12px; box-shadow: 0 20px 70px #12213a50; color: var(--ink); }
@@ -166,7 +164,7 @@
       <div class="map-hint">
         <span>กดลูกศรรหัสพื้นที่เพื่อดูรายละเอียด · ใช้ปุ่มเลือกพื้นที่หรือ + เพื่อขยาย</span>
         <div class="legend">
-          <span><i class="dot dot-Countermeasure"></i>Countermeasure</span>
+          <span><i class="dot dot-countermeasure"></i>Countermeasure</span>
           <span><i class="dot dot-kaizen"></i>Kaizen</span>
         </div>
       </div>
@@ -211,6 +209,7 @@
     // เพิ่ม/แก้รายการตรงนี้ ถ้าไม่มีรายการให้ใช้ const data = [];
     // areaCode เป็นตัวเลือก เช่น {areaCode:'7-7.2', area:'ชื่อพื้นที่', ...}
     // ถ้าไม่ใส่ areaCode ระบบจะอ่านรหัสที่อยู่ต้นข้อความ area
+    // type ใช้ Countermeasure หรือ Kaizen; Fault เดิมจะแสดงและนับเป็น Countermeasure
     const data = [
       {area:'5-1รั้วยืด', type:'Countermeasure', detail:'รั้วงอ'},
       {area:'6-1ตู้แอร์เคลื่อนที่', type:'Fault', detail:'ถังรองน้ำแอร์ชำรุด'},
@@ -477,8 +476,14 @@
       return match ? match[1] : '';
     }
 
+    // รองรับชื่อ Fault ในข้อมูลเก่า เพื่อให้ตัวนับ ตาราง และตัวกรองใช้ชื่อเดียวกัน
+    function normalizeType(type) {
+      const value = String(type || '').trim();
+      return value === 'Fault' ? 'Countermeasure' : value;
+    }
+
     function typeClass(type) {
-      return ({Fault: 'fault', Komorikoto: 'warning', Kaizen: 'kaizen'})[type] || '';
+      return ({Countermeasure: 'countermeasure', Kaizen: 'kaizen'})[normalizeType(type)] || '';
     }
 
     function statusLabel(type) {
@@ -486,12 +491,12 @@
       const cls = typeClass(type);
       span.className = `status-label status-${cls}`;
       if (cls) {
-        const  = document.createElement('i');
-        .className = ` -${cls}`;
-        .setAttribute('aria-hidden', 'true');
-        span.appendChild();
+        const dot = document.createElement('i');
+        dot.className = `dot dot-${cls}`;
+        dot.setAttribute('aria-hidden', 'true');
+        span.appendChild(dot);
       }
-      span.appendChild(document.createTextNode(type || 'ไม่ระบุประเภท'));
+      span.appendChild(document.createTextNode(normalizeType(type) || 'ไม่ระบุประเภท'));
       return span;
     }
 
@@ -526,7 +531,7 @@
       const tbody = document.getElementById('alarmTableBody');
       tbody.replaceChildren();
       const filtered = data.filter(item =>
-        (selectedType === 'all' || item.type === selectedType) &&
+        (selectedType === 'all' || normalizeType(item.type) === selectedType) &&
         `${item.areaCode || ''} ${item.area || ''} ${item.detail || ''}`.toLocaleLowerCase().includes(query)
       );
       filtered.forEach(item => {
@@ -547,8 +552,14 @@
     }
 
     function loadDashboard() {
-      document.getElementById('alarmCount').textContent = data.filter(item => item.type === 'Countermeasure').length;
-      document.getElementById('normalCount').textContent = data.filter(item => item.type === 'Kaizen').length;
+      const countermeasure = document.getElementById('alarmCount');
+      const kaizen = document.getElementById('normalCount');
+      if (countermeasure) {
+        countermeasure.textContent = data.filter(item => normalizeType(item.type) === 'Countermeasure').length;
+      }
+      if (kaizen) {
+        kaizen.textContent = data.filter(item => normalizeType(item.type) === 'Kaizen').length;
+      }
       renderTable();
     }
 
@@ -562,6 +573,7 @@
     function updateDateTime() {
       const now = new Date();
       const el = document.getElementById('currentDateTime');
+      if (!el) return;
       el.replaceChildren(document.createTextNode(clockFormatter.format(now)), document.createElement('br'),
         document.createTextNode(dateFormatter.format(now).replace(/ /g, '-')));
     }
