@@ -68,8 +68,7 @@
     .legend { display: flex; flex-wrap: wrap; gap: 14px; }
     .legend span { display: inline-flex; align-items: center; gap: 5px; }
     .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
-    .dot-fault { background: #d92532; }
-    .dot-warning { background: #f0c000; }
+    .dot-Countermeasure { background: #d92532; }
     .dot-kaizen { background: #00a861; }
     .alarm-section { margin-top: 16px; }
     .alarm-head { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; padding: 14px; }
@@ -487,10 +486,10 @@
       const cls = typeClass(type);
       span.className = `status-label status-${cls}`;
       if (cls) {
-        const dot = document.createElement('i');
-        dot.className = `dot dot-${cls}`;
-        dot.setAttribute('aria-hidden', 'true');
-        span.appendChild(dot);
+        const  = document.createElement('i');
+        .className = ` -${cls}`;
+        .setAttribute('aria-hidden', 'true');
+        span.appendChild();
       }
       span.appendChild(document.createTextNode(type || 'ไม่ระบุประเภท'));
       return span;
