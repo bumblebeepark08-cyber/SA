@@ -47,6 +47,7 @@
     .status-card { min-width: 91px; padding: 8px 10px; border-radius: 7px; text-align: center; font-size: 11px; font-weight: bold; }
     .status-card span { display: block; margin-top: 2px; font-size: 26px; line-height: 1.1; }
     .alarm { background: #ed172b; color: #fff; }
+    .warning { background: #ffe31b; color: #302900; }
     .normal { background: #00a861; color: #fff; }
     main { padding: 14px 16px 24px; }
     .map-card, .alarm-section { background: white; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
@@ -86,8 +87,9 @@
     th:nth-child(1) { width: 40%; }
     th:nth-child(2) { width: 150px; }
     .status-label { display: inline-flex; align-items: center; gap: 7px; font-weight: bold; white-space: nowrap; }
-    .status-Countermeasure { color: var(--Countermeasure); }
-    .status-Kaizen { color: var(--Kaizen); }
+    .status-fault { color: var(--fault); }
+    .status-warning { color: var(--warning); }
+    .status-kaizen { color: var(--kaizen); }
     .empty { padding: 22px; text-align: center; color: var(--muted); }
     dialog { width: min(540px, calc(100% - 28px)); max-height: 85vh; overflow: auto; padding: 24px; border: 0; border-radius: 12px; box-shadow: 0 20px 70px #12213a50; color: var(--ink); }
     dialog::backdrop { background: #0a193e85; }
@@ -134,7 +136,8 @@
     <h1>5S 3PILLARS PRODUCTION ENGINEER DEVELOPMENT</h1>
     <div id="currentDateTime" aria-label="วันและเวลาประเทศไทย"></div>
     <div class="status-box" aria-label="จำนวนรายการทั้งหมด">
-      <div class="status-card alarm">Countermeasure<span id="alarmCount">0</span></div>
+      <div class="status-card alarm">Fault<span id="alarmCount">0</span></div>
+      <div class="status-card warning">Komorikoto<span id="warningCount">0</span></div>
       <div class="status-card normal">Kaizen<span id="normalCount">0</span></div>
     </div>
   </header>
@@ -166,7 +169,8 @@
       <div class="map-hint">
         <span>กดลูกศรรหัสพื้นที่เพื่อดูรายละเอียด · ใช้ปุ่มเลือกพื้นที่หรือ + เพื่อขยาย</span>
         <div class="legend">
-          <span><i class="dot dot-Countermeasure"></i>Countermeasure</span>
+          <span><i class="dot dot-fault"></i>Fault</span>
+          <span><i class="dot dot-warning"></i>Komorikoto</span>
           <span><i class="dot dot-kaizen"></i>Kaizen</span>
         </div>
       </div>
@@ -181,7 +185,8 @@
           <label for="typeFilter">ประเภท</label>
           <select id="typeFilter">
             <option value="all">ทั้งหมด</option>
-            <option value="Fault">Countermeasure</option>
+            <option value="Fault">Fault</option>
+            <option value="Komorikoto">Komorikoto</option>
             <option value="Kaizen">Kaizen</option>
           </select>
         </div>
@@ -212,19 +217,19 @@
     // areaCode เป็นตัวเลือก เช่น {areaCode:'7-7.2', area:'ชื่อพื้นที่', ...}
     // ถ้าไม่ใส่ areaCode ระบบจะอ่านรหัสที่อยู่ต้นข้อความ area
     const data = [
-      {area:'5-1รั้วยืด', type:'Countermeasure', detail:'รั้วงอ'},
-      {area:'6-1ตู้แอร์เคลื่อนที่', 'Countermeasure', detail:'ถังรองน้ำแอร์ชำรุด'},
-      {area:'4-3ตู้เก็บอุปกรณ์ 5ส', type:'Countermeasure'', detail:'อุปกรณ์ไม่ครบ'},
-      {area:'4-7ตู้เก็บอุปกรณ์ Safety', type:'Countermeasure', detail:'ตู้เก็บอุปกรณ์เก่า'},
-      {area:'6-3เครื่องปริ้น 3D', type:'Countermeasure', detail:'พื้นที่ใหม่อุปกรณ์ไม่ตรงตามมาตรฐาน'},
-      {area:'7-2.4ที่จอดรถใส่อุปกรณ์ No.04', type:'Countermeasure', detail:'ยังไม่มีป้ายบ่งชี้'},
-      {area:'ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.02', type:'Countermeasure', detail:'ยังไม่มีรถเข็นใส่อุปกรณ์แบบลิ้นชัก อยู่ระหว่างรองบ'},
-      {area:'7-2.3ที่จอดรถใส่อุปกรณ์ No.03', type:'Countermeasure', detail:'เอกสาร Part list ไม่ครบ'},
-      {area:'7-5ที่เก็บเครื่องปริ้นมาร์คสายไฟสว่านไฟฟ้า Rollสายไฟ-สายลม', type:'Countermeasure', detail:'เอกสารไม่ครบ'},
-      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasure', detail:'Min Stock Order'},
-      {area:'4-5ตู้เก็บของใช้สิ้นเปลือง3-4', type:'Countermeasure', detail:'Min Stock Order'},
-      {area:'6-4แอร์ติดผนัง', type:'Countermeasure', detail:'ยังไม่มีเอกสารแพลนการล้างแอร์'},
-      {area:'7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.03', type:'Countermeasure', detail:'พื้นที่ใหม่ไม่มีเอกสาร'}
+      {area:'5-1รั้วยืด', type:'Fault', detail:'รั้วงอ'},
+      {area:'6-1ตู้แอร์เคลื่อนที่', type:'Fault', detail:'ถังรองน้ำแอร์ชำรุด'},
+      {area:'4-3ตู้เก็บอุปกรณ์ 5ส', type:'Fault', detail:'อุปกรณ์ไม่ครบ'},
+      {area:'4-7ตู้เก็บอุปกรณ์ Safety', type:'Fault', detail:'ตู้เก็บอุปกรณ์เก่า'},
+      {area:'6-3เครื่องปริ้น 3D', type:'Fault', detail:'พื้นที่ใหม่อุปกรณ์ไม่ตรงตามมาตรฐาน'},
+      {area:'7-2.4ที่จอดรถใส่อุปกรณ์ No.04', type:'Fault', detail:'ยังไม่มีป้ายบ่งชี้'},
+      {area:'ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.02', type:'Fault', detail:'ยังไม่มีรถเข็นใส่อุปกรณ์แบบลิ้นชัก อยู่ระหว่างรองบ'},
+      {area:'7-2.3ที่จอดรถใส่อุปกรณ์ No.03', type:'Fault', detail:'เอกสาร Part list ไม่ครบ'},
+      {area:'7-5ที่เก็บเครื่องปริ้นมาร์คสายไฟสว่านไฟฟ้า Rollสายไฟ-สายลม', type:'Fault', detail:'เอกสารไม่ครบ'},
+      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Fault', detail:'Min Stock Order'},
+      {area:'4-5ตู้เก็บของใช้สิ้นเปลือง3-4', type:'Fault', detail:'Min Stock Order'},
+      {area:'6-4แอร์ติดผนัง', type:'Fault', detail:'ยังไม่มีเอกสารแพลนการล้างแอร์'},
+      {area:'7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.03', type:'Fault', detail:'พื้นที่ใหม่ไม่มีเอกสาร'}
     ];
 
     // ==================== สี / เครื่องมือวาด ====================
@@ -391,10 +396,11 @@
       box(1010, 325, 237, 55, 'ที่เก็บเครื่องมือวัด', {size: 16});
       tag('7-4', 'ที่เก็บเครื่องมือวัด', 1128, 421, 'gray', 'up');
       box(1247, 325, 238, 55, 'ชั้นเก็บอุปกรณ์สิ้นเปลือง 3', {size: 14});
-      tag('4-6', 'ชั้นเก็บอุปกรณ์สิ้นเปลือง 5', 1366, 421, 'yellow', 'up');
+      tag('4-6', 'ชั้นเก็บอุปกรณ์สิ้นเปลือง 3', 1366, 421, 'yellow', 'up');
       box(1485, 325, 340, 55, ['ที่เก็บเครื่องปริ้นมาร์คสายไฟ / สว่านไฟฟ้า', 'Roll สายไฟ–สายลม'], {size: 14});
       tag('7-5', 'ที่เก็บเครื่องปริ้นมาร์คสายไฟ สว่านไฟฟ้า Roll สายไฟ–สายลม', 1655, 421, 'gray', 'up');
       box(1825, 325, 140, 55, 'บอร์ด STW', {size: 17});
+      tag('6-2', 'บอร์ด STW', 1895, 421, 'blue', 'up');
       box(1965, 325, 225, 43, 'บอร์ด Post Document', {size: 16});
       tag('8-1', 'บอร์ด Post Document', 2076, 414, 'orange', 'up');
       box(719, 830, 131, 75, ['ล็อกเกอร์ของใช้', 'ส่วนตัว'], {size: 15});
@@ -477,7 +483,7 @@
     }
 
     function typeClass(type) {
-      return ({Fault: 'Countermeasure', Kaizen: 'Kaizen'})[type] || '';
+      return ({Fault: 'fault', Komorikoto: 'warning', Kaizen: 'kaizen'})[type] || '';
     }
 
     function statusLabel(type) {
@@ -546,7 +552,8 @@
     }
 
     function loadDashboard() {
-      document.getElementById('alarmCount').textContent = data.filter(item => item.type === 'Countermeasure').length;
+      document.getElementById('alarmCount').textContent = data.filter(item => item.type === 'Fault').length;
+      document.getElementById('warningCount').textContent = data.filter(item => item.type === 'Komorikoto').length;
       document.getElementById('normalCount').textContent = data.filter(item => item.type === 'Kaizen').length;
       renderTable();
     }
