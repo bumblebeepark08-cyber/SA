@@ -550,7 +550,7 @@
     }
 
     function loadDashboard() {
-      document.getElementById('alarmCount').textContent = data.filter(item => item.type === 'Fault').length;
+      document.getElementById('alarmCount').textContent = data.filter(item => item.type === 'Countermeasure').length;
       document.getElementById('normalCount').textContent = data.filter(item => item.type === 'Kaizen').length;
       renderTable();
     }
