@@ -136,7 +136,8 @@
     <h1>5S 3PILLARS PRODUCTION ENGINEER DEVELOPMENT</h1>
     <div id="currentDateTime" aria-label="วันและเวลาประเทศไทย"></div>
     <div class="status-box" aria-label="จำนวนรายการทั้งหมด">
-      <div class="status-card alarm">Countermeasure<span id="alarmCount">0</span></div>
+      <div class="status-card alarm">Fault<span id="alarmCount">0</span></div>
+      <div class="status-card warning">Komorikoto<span id="warningCount">0</span></div>
       <div class="status-card normal">Kaizen<span id="normalCount">0</span></div>
     </div>
   </header>
@@ -168,7 +169,8 @@
       <div class="map-hint">
         <span>กดลูกศรรหัสพื้นที่เพื่อดูรายละเอียด · ใช้ปุ่มเลือกพื้นที่หรือ + เพื่อขยาย</span>
         <div class="legend">
-          <span><i class="dot dot-fault"></i>Countermeasure</span>
+          <span><i class="dot dot-fault"></i>Fault</span>
+          <span><i class="dot dot-warning"></i>Komorikoto</span>
           <span><i class="dot dot-kaizen"></i>Kaizen</span>
         </div>
       </div>
@@ -183,7 +185,8 @@
           <label for="typeFilter">ประเภท</label>
           <select id="typeFilter">
             <option value="all">ทั้งหมด</option>
-            <option value="Fault">Countermeasure</option>
+            <option value="Fault">Fault</option>
+            <option value="Komorikoto">Komorikoto</option>
             <option value="Kaizen">Kaizen</option>
           </select>
         </div>
@@ -214,11 +217,11 @@
     // areaCode เป็นตัวเลือก เช่น {areaCode:'7-7.2', area:'ชื่อพื้นที่', ...}
     // ถ้าไม่ใส่ areaCode ระบบจะอ่านรหัสที่อยู่ต้นข้อความ area
     const data = [
-      {area:'5-1รั้วยืด', type:'Countermeasure', detail:'รั้วงอ'},
-      {area:'6-1ตู้แอร์เคลื่อนที่', type:'Countermeasure', detail:'ถังรองน้ำแอร์ชำรุด'},
-      {area:'4-3ตู้เก็บอุปกรณ์ 5ส', type:'Countermeasure', detail:'อุปกรณ์ไม่ครบ'},
-      {area:'4-7ตู้เก็บอุปกรณ์ Safety', type:'Countermeasure', detail:'ตู้เก็บอุปกรณ์เก่า'},
-      {area:'6-3เครื่องปริ้น 3D', type:'Countermeasure', detail:'พื้นที่ใหม่อุปกรณ์ไม่ตรงตามมาตรฐาน'},
+      {area:'5-1รั้วยืด', type:'Fault', detail:'รั้วงอ'},
+      {area:'6-1ตู้แอร์เคลื่อนที่', type:'Fault', detail:'ถังรองน้ำแอร์ชำรุด'},
+      {area:'4-3ตู้เก็บอุปกรณ์ 5ส', type:'Fault', detail:'อุปกรณ์ไม่ครบ'},
+      {area:'4-7ตู้เก็บอุปกรณ์ Safety', type:'Fault', detail:'ตู้เก็บอุปกรณ์เก่า'},
+      {area:'6-3เครื่องปริ้น 3D', type:'Fault', detail:'พื้นที่ใหม่อุปกรณ์ไม่ตรงตามมาตรฐาน'},
       {area:'7-2.4ที่จอดรถใส่อุปกรณ์ No.04', type:'Fault', detail:'ยังไม่มีป้ายบ่งชี้'},
       {area:'ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.02', type:'Fault', detail:'ยังไม่มีรถเข็นใส่อุปกรณ์แบบลิ้นชัก อยู่ระหว่างรองบ'},
       {area:'7-2.3ที่จอดรถใส่อุปกรณ์ No.03', type:'Fault', detail:'เอกสาร Part list ไม่ครบ'},
