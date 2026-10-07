@@ -1,414 +1,622 @@
 <!DOCTYPE html>
-
 <html lang="th">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>5S Dashboard</title>
-
-    <link rel="stylesheet" href="css5s.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5S Dashboard — Machine Making Center & AI Section</title>
+  <!--
+    ไฟล์เดียวจบ: HTML + CSS + JavaScript ไม่ต้องติดตั้งโปรแกรมหรือใช้ CDN
+    ใช้แทน index.html ในโฟลเดอร์เดียวกับ KYT.html และ 3Pillars.html
+    1. แก้รายการสิ่งผิดปกติที่ const data ด้านล่าง
+    2. แก้ชื่อ / ตำแหน่งที่ฟังก์ชัน drawOffice, drawWorkshop, drawAssembly
+    3. x, y, width, height เป็นพิกัดบนแผนผัง 3200 × 1120
+    4. สีลูกศรเป็นกลุ่มอุปกรณ์ตามภาพ ไม่ใช่สีสถานะ Fault / Kaizen
+    5. ข้อมูลใน data เป็นข้อมูลจาก HTML ต้นฉบับ ไม่ได้เชื่อมข้อมูลออนไลน์อัตโนมัติ
+    หมายเหตุจากภาพอ้างอิง:
+    - รหัส 6-2 ใช้ทั้งบอร์ด STW และ Training Unit ตามภาพ
+    - จัดรหัสรถเข็นเรียง 7-2.1 ถึง 7-2.6, ลิ้นชัก 7-7.1 ถึง 7-7.6,
+      กล่องเครื่องมือ 7-8.1 ถึง 7-8.6 เพื่อให้ตรงกับหมายเลขจุด 01–06
+      (ป้ายรถเข็นบางแถวในภาพเล็กและมีเลขสลับกัน ควรตรวจรหัสก่อนใช้จริง)
+    - ชื่อ 5-14 ใช้คำกลางว่า “ไฟส่องสว่าง” เพราะข้อความในภาพเล็ก
+  -->
+  <style>
+    :root {
+      --navy: #143376;
+      --blue: #0560d8;
+      --line: #d6dce6;
+      --ink: #172434;
+      --muted: #586579;
+      --fault: #d92532;
+      --warning: #9b7100;
+      --kaizen: #007c4e;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f3f5f8; color: var(--ink); font-family: Tahoma, "Noto Sans Thai", "Leelawadee UI", Arial, sans-serif; }
+    button, input, select { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { cursor: pointer; }
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid #008ad8; outline-offset: 3px;
+    }
+    .header { display: flex; align-items: center; gap: 22px; padding: 15px 20px; background: var(--navy); color: white; }
+    .nav-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .nav-group a { color: white; background: var(--blue); text-decoration: none; padding: 10px 15px; border-radius: 7px; font-size: 13px; font-weight: bold; white-space: nowrap; }
+    .header h1 { flex: 1; margin: 0; font-size: clamp(15px, 1.45vw, 25px); text-align: center; line-height: 1.45; }
+    #currentDateTime { text-align: center; font-size: 13px; line-height: 1.6; min-width: 95px; font-variant-numeric: tabular-nums; }
+    .status-box { display: flex; gap: 8px; }
+    .status-card { min-width: 91px; padding: 8px 10px; border-radius: 7px; text-align: center; font-size: 11px; font-weight: bold; }
+    .status-card span { display: block; margin-top: 2px; font-size: 26px; line-height: 1.1; }
+    .alarm { background: #ed172b; color: #fff; }
+    .warning { background: #ffe31b; color: #302900; }
+    .normal { background: #00a861; color: #fff; }
+    main { padding: 14px 16px 24px; }
+    .map-card, .alarm-section { background: white; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    .toolbar-title { margin: 0; font-size: 16px; }
+    .toolbar-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .toolbar button, #closeDialog { border: 1px solid #bfcbd9; background: #fff; color: var(--navy); padding: 8px 12px; border-radius: 5px; font-size: 12px; }
+    .toolbar button[aria-pressed="true"] { color: #fff; background: var(--navy); border-color: var(--navy); }
+    .toolbar button:disabled { cursor: default; opacity: .4; }
+    .zoom-value { min-width: 42px; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums; }
+    #mapViewport { overflow: auto; max-height: 76vh; background: #fff; overscroll-behavior: contain; }
+    #layout { display: block; width: 100%; height: auto; margin-inline: auto; font-family: Tahoma, "Noto Sans Thai", "Leelawadee UI", Arial, sans-serif; }
+    #layout text { pointer-events: none; user-select: none; }
+    .zone-button { cursor: pointer; outline: none; }
+    .zone-button .tag-shape { transition: filter .15s; }
+    .zone-button:hover .tag-shape { filter: brightness(.88); }
+    .zone-button:focus .tag-shape { stroke: #002da5; stroke-width: 4; }
+    .map-hint { padding: 10px 14px; border-top: 1px solid #e5e9ef; color: var(--muted); font-size: 12px; display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: space-between; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
+    .dot-fault { background: #d92532; }
+    .dot-warning { background: #f0c000; }
+    .dot-kaizen { background: #00a861; }
+    .alarm-section { margin-top: 16px; }
+    .alarm-head { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; padding: 14px; }
+    .alarm-head h2 { margin: 0; color: var(--navy); font-size: 16px; }
+    .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .filters label { font-size: 12px; }
+    .filters input, .filters select { padding: 8px 10px; border: 1px solid #bfcbd9; border-radius: 5px; color: var(--ink); background: white; font-size: 13px; }
+    .filters input { width: 220px; max-width: 100%; }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    th { padding: 10px 14px; background: #ecf1f8; font-size: 12px; color: #253e65; }
+    td { padding: 11px 14px; border-bottom: 1px solid #e7ebf0; line-height: 1.6; }
+    tr:last-child td { border-bottom: 0; }
+    th:nth-child(1) { width: 40%; }
+    th:nth-child(2) { width: 150px; }
+    .status-label { display: inline-flex; align-items: center; gap: 7px; font-weight: bold; white-space: nowrap; }
+    .status-fault { color: var(--fault); }
+    .status-warning { color: var(--warning); }
+    .status-kaizen { color: var(--kaizen); }
+    .empty { padding: 22px; text-align: center; color: var(--muted); }
+    dialog { width: min(540px, calc(100% - 28px)); max-height: 85vh; overflow: auto; padding: 24px; border: 0; border-radius: 12px; box-shadow: 0 20px 70px #12213a50; color: var(--ink); }
+    dialog::backdrop { background: #0a193e85; }
+    .dialog-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    #zoneCode { margin: 0; color: var(--navy); font-size: 28px; }
+    #zoneName { font-size: 18px; margin: 14px 0 20px; line-height: 1.6; }
+    .zone-report { padding: 14px; margin-top: 10px; background: #f4f6fa; border-radius: 6px; line-height: 1.7; }
+    .zone-report p { margin: 8px 0 0; }
+    noscript { display: block; padding: 30px; color: #8e2029; }
+    @media (max-width: 1050px) {
+      .header { flex-wrap: wrap; gap: 12px; }
+      .header h1 { order: -1; flex-basis: 100%; }
+      .nav-group { flex: 1; }
+      .status-card { min-width: 76px; }
+    }
+    @media (max-width: 600px) {
+      .header { padding: 12px; }
+      .status-box { flex-basis: 100%; }
+      .status-card { flex: 1; }
+      .toolbar { align-items: flex-start; }
+      main { padding: 10px; }
+      .filters { width: 100%; }
+      .filters input { width: 170px; }
+      table { min-width: 620px; }
+    }
+    @media print {
+      body { background: white; }
+      .nav-group, .toolbar-actions, .filters, .map-hint, dialog { display: none !important; }
+      .header { background: white; color: black; }
+      main { padding: 0; }
+      #mapViewport { max-height: none; overflow: visible; }
+      #layout { width: 100% !important; }
+      .map-card { break-inside: avoid; }
+      * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+  </style>
 </head>
-
 <body>
-
-
-
-    <!-- ================= HEADER SECTION ================= -->
-
-    <header class="header">
-
-        <h1>5S 3PILLARS PRODUCTION ENGINEER DEVELOPMENT</h1>
-
-
-
-        <div class="nav-group">
-
-            <button class="btn-kyt" onclick="window.location.href='KYT.html'">กิจกรรม KYT</button>
-
-            <button class="btn-3pillars" onclick="window.location.href='3Pillars.html'">3Pillars</button>
-
-        </div>
-
-
-
-        <div id="currentDateTime"></div>
-
-
-
-        <div class="status-box">
-
-            <div class="card alarm">Fault<br><span id="alarmCount">0</span></div>
-
-            <div class="card warning">Komorikoto<br><span id="warningCount">0</span></div>
-
-            <div class="card normal">Kaizen<br><span id="normalCount">0</span></div>
-
-        </div>
-
-    </header>
-
-
-
-    <div class="title">
-
-        LAYOUT MACHINE MAKING CENTER & AI SECTION
-
+  <header class="header">
+    <nav class="nav-group" aria-label="เมนูหลัก">
+      <a href="KYT.html">กิจกรรม KYT</a>
+      <a href="3Pillars.html">3Pillars</a>
+    </nav>
+    <h1>5S 3PILLARS PRODUCTION ENGINEER DEVELOPMENT</h1>
+    <div id="currentDateTime" aria-label="วันและเวลาประเทศไทย"></div>
+    <div class="status-box" aria-label="จำนวนรายการทั้งหมด">
+      <div class="status-card alarm">Fault<span id="alarmCount">0</span></div>
+      <div class="status-card warning">Komorikoto<span id="warningCount">0</span></div>
+      <div class="status-card normal">Kaizen<span id="normalCount">0</span></div>
     </div>
-
-
-
-    <!-- ================= MAIN CONTENT ================= -->
-
-    <main class="main">
-
-
-
-        <!-- Layout Area -->
-
-        <div class="layout" id="layout">
-
-
-
-            <!-- Arrow Tags -->
-
-            <div class="arrow-tag arrow-blue" style="left: 120px; top: 300px; transform: rotate(90deg);">5-8</div>
-
-            <div class="arrow-tag arrow-blue" style="left: 120px; top: 380px; transform: rotate(90deg);">5-9</div>
-
-            <div class="arrow-tag arrow-purple" style="left: 230px; top: 90px; transform: rotate(180deg);">6-4</div>
-
-            <div class="arrow-tag arrow-purple" style="left: 360px; top: 90px; transform: rotate(180deg);">6-5</div>
-
-            <div class="arrow-tag arrow-purple" style="left: 500px; top: 90px; transform: rotate(270deg);">6-5</div>
-
-            <div class="arrow-tag arrow-yellow" style="left: 740px; top: 90px; transform: rotate(90deg);">4-4</div>
-
-            <div class="arrow-tag arrow-yellow" style="left: 740px; top: 160px; transform: rotate(90deg);">4-5</div>
-
-            <div class="arrow-tag arrow-gray" style="left: 820px; top: 110px; transform: rotate(180deg);">7-3</div>
-
-            <div class="arrow-tag arrow-gray" style="left: 1030px; top: 110px; transform: rotate(180deg);">7-4</div>
-
-            <div class="arrow-tag arrow-yellow" style="left: 1250px; top: 110px; transform: rotate(180deg);">4-6</div>
-
-            <div class="arrow-tag arrow-gray" style="left: 1500px; top: 110px; transform: rotate(180deg);">7-5</div>
-
-            <div class="arrow-tag arrow-red" style="left: 640px; top: 610px; transform: rotate(360deg);">9-1</div>
-
-            <div class="arrow-tag arrow-yellow" style="left: 750px; top: 700px; transform: rotate(360deg);">4-3</div>
-
-            <div class="arrow-tag arrow-yellow" style="left: 980px; top: 635px; transform: rotate(360deg);">4-8</div>
-
-            <div class="arrow-tag arrow-yellow" style="left: 1200px; top: 635px; transform: rotate(360deg);">4-2</div>
-
-            <div class="arrow-tag arrow-purple" style="left: 1350px; top: 635px; transform: rotate(360deg);">6-3</div>
-
-            <div class="arrow-tag arrow-blue" style="left: 1580px; top: 700px; transform: rotate(360deg);">5-3</div>
-
-            <div class="arrow-tag arrow-purple" style="left: 1800px; top: 660px; transform: rotate(360deg);">6-2</div>
-
-
-
-            <!-- Areas & Desks -->
-
-            <div class="area" style="left: 10px; top: 10px; width: 600px; height: 760px;"></div>
-
-
-
-            <div class="area" style="left: 5px; top: 25px; width: 70px; height: 50px; transform: rotate(270deg); font-size: 15px;">โต๊ะทำงาน 11</div>
-
-            <div class="area" style="left: 5px; top: 116px; width: 70px; height: 50px; transform: rotate(270deg); font-size: 15px;">โต๊ะทำงาน 12</div>
-
-
-
-            <div class="area" style="left: 200px; top: 14px; width: 100px; height: 20px; font-size: 20px;">AIR</div>
-
-            <div class="area" style="left: 323px; top: 14px; width: 100px; height: 20px; font-size: 20px;">TV2</div>
-
-
-
-            <div class="area" style="left: -70px; top: 350px; width: 180px; height: 10px; transform: rotate(270deg); font-size: 20px;">ประตู</div>
-
-            <div class="area" style="left: 15px; top: 295px; width: 80px; height: 20px; transform: rotate(270deg); font-size: 20px;">กระจก</div>
-
-            <div class="area" style="left: 15px; top: 395px; width: 80px; height: 20px; transform: rotate(270deg); font-size: 20px;">ผ้าม่าน</div>
-
-
-
-            <div class="area" style="left: 545px; top: 100px; width: 100px; height: 20px; transform: rotate(450deg); font-size: 20px;">TV1</div>
-
-            <div class="area" style="left: 512px; top: 350px; width: 180px; height: 10px; transform: rotate(450deg); font-size: 15px;">ประตู</div>
-
-            <div class="area" style="left: 545px; top: 612px; width: 70px; height: 50px; transform: rotate(450deg); font-size: 15px;">โต๊ะทำงาน 11</div>
-
-            <div class="area" style="left: 545px; top: 705px; width: 70px; height: 50px; transform: rotate(450deg); font-size: 15px;">โต๊ะทำงาน 12</div>
-
-
-
-            <div class="area" style="left: 230px; top: 760px; width: 180px; height: 10px; font-size: 15px;">หน้าต่าง</div>
-
-            <div class="area" style="left: 230px; top: 730px; width: 90px; height: 10px; font-size: 15px;">กระจก</div>
-
-            <div class="area" style="left: 320px; top: 730px; width: 90px; height: 10px; font-size: 15px;">ผ้าม่าน</div>
-
-
-
-            <div class="area" style="left: 320px; top: 650px; width: 70px; height: 50px; transform: rotate(270deg);">โต๊ะทำงาน 2</div>
-
-            <div class="area" style="left: 250px; top: 650px; width: 70px; height: 50px; transform: rotate(270deg);">โต๊ะทำงาน 1</div>
-
-            <div class="area" style="left: 250px; top: 560px; width: 70px; height: 50px; transform: rotate(270deg);">โต๊ะทำงาน 3</div>
-
-            <div class="area" style="left: 320px; top: 560px; width: 70px; height: 50px; transform: rotate(270deg);">โต๊ะทำงาน 4</div>
-
-            <div class="area" style="left: 250px; top: 470px; width: 70px; height: 50px; transform: rotate(270deg);">โต๊ะทำงาน 5</div>
-
-            <div class="area" style="left: 320px; top: 470px; width: 70px; height: 50px; transform: rotate(270deg);">โต๊ะทำงาน 6</div>
-
-            <div class="area" style="left: 250px; top: 380px; width: 70px; height: 50px; transform: rotate(270deg);">โต๊ะทำงาน 7</div>
-
-            <div class="area" style="left: 320px; top: 380px; width: 70px; height: 50px; transform: rotate(270deg);">โต๊ะทำงาน 8</div>
-
-            <div class="area" style="left: 280px; top: 300px; width: 70px; height: 50px;">โต๊ะทำงาน 9</div>
-
-
-
-            <div class="area" style="left: 545px; top: 350px; width: 180px; height: 10px; transform: rotate(270deg); font-size: 15px;">กระจกอะลูมิเนียม</div>
-
-
-
-            <div class="area" style="left: 620px; top: 130px; width: 90px; height: 70px; transform: rotate(270deg); font-size: 15px;">ตู้เก็บของใช้สิ้นเปลือง1-2</div>
-
-            <div class="area" style="left: 620px; top: 20px; width: 90px; height: 70px; transform: rotate(270deg); font-size: 15px;">ตู้เก็บของใช้สิ้นเปลือง3-4</div>
-
-            <div class="area" style="left: 605px; top: 695px; width: 100px; height: 50px; transform: rotate(270deg); font-size: 15px;">ล็อกเกอร์ของใช้ส่วนตัว</div>
-
-
-
-            <div class="area" style="left: 700px; top: 760px; width: 150px; height: 10px; font-size: 15px;">ตู้เก็บอุปกรณ์5ส</div>
-
-            <div class="area" style="left: 870px; top: 760px; width: 250px; height: 10px; font-size: 15px;">ที่แขวนหมวกSafety และหมวกผ้า</div>
-
-            <div class="area" style="left: 870px; top: 700px; width: 250px; height: 40px; font-size: 15px;">ที่เก็บเศษอลูมิเนียมโปรไฟล์Wiring ductรางรีเลย์</div>
-
-            <div class="area" style="left: 1140px; top: 750px; width: 150px; height: 20px; font-size: 15px;">ตู้เก็บอุปกรณ์Safety</div>
-
-            <div class="area" style="left: 1140px; top: 700px; width: 150px; height: 30px; font-size: 15px;">ที่เก็บอุปกรณ์สำนักงาน</div>
-
-            <div class="area" style="left: 1310px; top: 700px; width: 100px; height: 70px; font-size: 15px;">เครื่องปริ้นท์3D</div>
-
-            <div class="area" style="left: 1500px; top: 760px; width: 250px; height: 10px; font-size: 15px;">บอร์ด Training</div>
-
-            <div class="area" style="left: 1750px; top: 760px; width: 250px; height: 10px; font-size: 15px;">บอร์ด Post Document</div>
-
-            <div class="area" style="left: 1750px; top: 723px; width: 250px; height: 20px; font-size: 15px;">Training Unit</div>
-
-            <div class="area" style="left: 1902px; top: 350px; width: 180px; height: 10px; transform: rotate(450deg); font-size: 15px;">ทางเดินด้านหน้า</div>
-
-
-
-            <div class="area" style="left: 725px; top: 10px; width: 200px; height: 50px; font-size: 15px;">แผงเก็บเครื่องมือ</div>
-
-            <div class="area" style="left: 945px; top: 10px; width: 200px; height: 50px; font-size: 15px;">ที่เก็บเครื่องมือวัด</div>
-
-            <div class="area" style="right: 622px; top: 10px; width: 200px; height: 50px; font-size: 15px;">ชั้นเก็บอุปกรณ์สิ้นเปลือง3</div>
-
-            <div class="area" style="right: 352px; top: 10px; width: 250px; height: 50px; font-size: 15px;">ที่เก็บเครื่องปริ้นมาร์คสายไฟสว่านไฟฟ้า Rollสายไฟ-สายลม</div>
-
+  </header>
+
+  <main>
+    <section class="map-card" aria-labelledby="mapHeading">
+      <div class="toolbar">
+        <h2 class="toolbar-title" id="mapHeading">LAYOUT MACHINE MAKING CENTER & AI SECTION</h2>
+        <div class="toolbar-actions">
+          <button type="button" data-view="all" aria-pressed="true">แสดงทั้งหมด</button>
+          <button type="button" data-view="office" aria-pressed="false">สำนักงาน</button>
+          <button type="button" data-view="workshop" aria-pressed="false">Machine Making</button>
+          <button type="button" data-view="assembly" aria-pressed="false">พื้นที่ประกอบ</button>
+          <button type="button" id="zoomOut" aria-label="ย่อแผนผัง">−</button>
+          <output id="zoomValue" class="zoom-value">100%</output>
+          <button type="button" id="zoomIn" aria-label="ขยายแผนผัง">+</button>
         </div>
-
-
-
-<!-- Extra Facilities Items -->
-
-        <div class="area" style="left: 1650px; top: 820px; width: 250px; height: 50px; font-size: 20px;">พัดลม</div>
-
-        <div class="area" style="left: 1650px; top: 880px; width: 250px; height: 50px; font-size: 17px;">กล้องวงจรปิด/ไฟส่องสว่าง/ปลั๊กไฟ</div>
-
-        <div class="area" style="left: 1650px; top: 940px; width: 250px; height: 50px; font-size: 20px;">ฝ้า/แพดาน/โรลสายลม</div>
-
-        <div class="area" style="left: 1650px; top: 1000px; width: 250px; height: 50px; font-size: 20px;">พื้น /เอกสาร/ป้ายต่าง/แผ่นใส</div>
-
-
-
-        <div class="arrow-tag arrow-yellow" style="left: 1000px; top: 820px; transform: rotate(180deg);">4-1</div>
-
-        <div class="arrow-tag arrow-yellow" style="left: 1220px; top: 820px; transform: rotate(180deg);">4-7</div>
-
-        <div class="arrow-tag arrow-yellow" style="left: 1850px; top: 820px; transform: rotate(180deg);">8-1</div>
-
-        <div class="arrow-tag arrow-blue" style="left: 1950px; top: 850px; transform: rotate(90deg);">5-4</div>
-
-        <div class="arrow-tag arrow-blue" style="left: 1950px; top: 900px; transform: rotate(90deg);">5-5</div>
-
-        <div class="arrow-tag arrow-blue" style="left: 1950px; top: 950px; transform: rotate(90deg);">5-6</div>
-
-        <div class="arrow-tag arrow-blue" style="left: 1950px; top: 1000px; transform: rotate(90deg);">5-7</div>        
-
-
-
-        <!-- Right Panel (Assembly Area & Alarm List) -->
-
-<!-- Right Panel (Assembly Area & Alarm List) -->
-
-        <div class="right-panel">
-
-            <div class="right-group">
-
-                <div class="blue-zone"></div>
-
-                
-
-                <!-- เพิ่มลูกศรตรงนี้ (โซนสีน้ำเงิน) -->
-
-                <div class="arrow-tag arrow-red" style="position: absolute; left: 20px; top: 350px; transform: rotate(90deg); z-index: 10;">1-1</div>
-
-
-
-                <div class="yellow-zone"></div>
-
-                <div class="side">
-
-                    <h2>พื้นที่ประกอบ</h2>    
-                </div>
-
-            </div>
-
-
-
-            <div class="alarm-list">
-
-                <b class="alarm-title">ALARM LIST</b>
-
-                <table id="alarmTable">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>พื้นที่</th>
-
-                            <th>ประเภท</th>
-
-                            <th>รายละเอียด</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="alarmTableBody"></tbody>
-
-                </table>
-
-            </div>
-
+      </div>
+      <div id="mapViewport">
+        <svg id="layout" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3200 1120" aria-labelledby="layoutTitle layoutDescription">
+          <title id="layoutTitle">แผนผัง 5S Machine Making Center และ AI Section</title>
+          <desc id="layoutDescription">สำนักงานอยู่ซ้าย พื้นที่ Machine Making ตรงกลาง ทางเดินสีน้ำเงินและสีเหลืองเชื่อมไปยังพื้นที่ประกอบสีเขียวด้านขวา กดลูกศรรหัสพื้นที่เพื่อดูรายละเอียด</desc>
+          <g id="floorLayer"></g>
+          <g id="equipmentLayer"></g>
+          <g id="tagLayer"></g>
+        </svg>
+      </div>
+      <noscript>กรุณาเปิด JavaScript ในเบราว์เซอร์เพื่อแสดงแผนผังและรายการสิ่งผิดปกติ</noscript>
+      <div class="map-hint">
+        <span>กดลูกศรรหัสพื้นที่เพื่อดูรายละเอียด · ใช้ปุ่มเลือกพื้นที่หรือ + เพื่อขยาย</span>
+        <div class="legend">
+          <span><i class="dot dot-fault"></i>Fault</span>
+          <span><i class="dot dot-warning"></i>Komorikoto</span>
+          <span><i class="dot dot-kaizen"></i>Kaizen</span>
         </div>
+      </div>
+    </section>
 
+    <section class="alarm-section" aria-labelledby="alarmHeading">
+      <div class="alarm-head">
+        <h2 id="alarmHeading">ALARM LIST · รายการสิ่งผิดปกติ</h2>
+        <div class="filters">
+          <label for="areaSearch">ค้นหา</label>
+          <input id="areaSearch" type="search" placeholder="รหัสพื้นที่ / รายละเอียด">
+          <label for="typeFilter">ประเภท</label>
+          <select id="typeFilter">
+            <option value="all">ทั้งหมด</option>
+            <option value="Fault">Fault</option>
+            <option value="Komorikoto">Komorikoto</option>
+            <option value="Kaizen">Kaizen</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table id="alarmTable">
+          <thead><tr><th scope="col">พื้นที่</th><th scope="col">ประเภท</th><th scope="col">รายละเอียด</th></tr></thead>
+          <tbody id="alarmTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 
-
-    </main>
-
-
-
-    <!-- ================= LEGEND SECTION ================= -->
-
-    <div class="legend">
-
-        <div>🔴 Fault Item</div>
-
-        <div>🟡 Komorikoto Item</div>
-
-        <div>🟢 Kaizen Item</div>
-
+  <dialog id="zoneDialog" aria-labelledby="zoneCode" aria-describedby="zoneName">
+    <div class="dialog-top">
+      <h2 id="zoneCode"></h2>
+      <button type="button" id="closeDialog">ปิด ×</button>
     </div>
+    <p id="zoneName"></p>
+    <div id="zoneReports"></div>
+  </dialog>
 
-<script>
-const data = [
-  {area:"5-1รั้วยืด", type:"Fault", detail:"รั้วงอ"},
-  {area:"6-1ตู้แอร์เคลื่อนที่", type:"Fault", detail:"ถังรองน้ำแอร์ชำรุด"},
-  {area:"4-3ตู้เก็บอุปกรณ์ 5ส ", type:"Fault", detail:"อุปกรณ์ไม่ครบ"},
-  {area:"4-7ตู้เก็บอุปกรณ์ Safety", type:"Fault", detail:"ตู้เก็บอุปกรณ์เก่า"},
-  {area:"6-3เครื่องปริ้น 3D", type:"Fault", detail:"พื้นที่ใหม่อุปกรณ์ไม่ตรงตามมาตรฐาน"},
-  {area:"7-2.4ที่จอดรถใส่อุปกรณ์ No.04", type:"Fault", detail:"ยังไม่มีป้ายบ่งชี้"},
-  {area:"ที่จอดรถเข็นใส่อุปกรณ์แบบลื้นชัก No.02", type:"Fault", detail:"ยังไม่มีรถเข็นใส่อุปกรณ์แบบลิ้นชักอยู่ระหว่างรองบ"},
-  {area:"7-2.3ที่จอดรถใส่อุปกรณ์ No.03", type:"Fault", detail:"เอกสาร Part listไม่ครบ"},
-  {area:"7-5ที่เก็บเครื่องปริ้นมาร์คสายไฟสว่านไฟฟ้า Rollสายไฟ-สายลม", type:"Fault", detail:"เอกสารไม่ครบ"},
-  {area:"4-6ตู้เก็บของใช้สิ้นเปลือง5", type:"Fault", detail:"Min Stock Order"},
-  {area:"4-5ตู้เก็บของใช้สิ้นเปลือง3-4", type:"Fault", detail:"Min Stock Order"},
-  {area:"6-4แอร์ติดผนัง", type:"Fault", detail:"ยังไม่มีเอกสารเเพลนการล้างแอร์"},
-  {area:"7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลื้นชัก No.03", type:"Fault", detail:"พื้นที่ใหม่ไม่มีเอกสาร"},
-];
- 
-const positions = {
-  "5-8": {x:20,y:20},
-  "10-10": {x:30,y:300},
-};
- 
-function createPopup(item){
-  const layout = document.getElementById("layout");
-  const p = positions[item.area];
-  if(!p) return;
- 
-  let cls = item.type === "Fault" ? "alarm" :
-            item.type === "Komorikoto" ? "warning" : "normal";
- 
-  let title = item.type === "Fault" ? "ALARM" :
-              item.type === "Komorikoto" ? "WARNING" : "NORMAL";
- 
-  const pop = document.createElement("div");
-  pop.className = "popup";
-  pop.style.left = p.x + "px";
-  pop.style.top = p.y + "px";
-  pop.style.borderColor = item.type === "Fault" ? "red" :
-                          item.type === "Komorikoto" ? "#ffd500" : "#00b050";
- 
-  pop.innerHTML = `
-    <div class="head ${cls}">🔔 ${title}</div>
-    <div class="body">
-      <b>${item.area}</b><br>
-      ${item.detail}<br>
-      <b>${item.time}</b>
-    </div>
-  `;
- 
-  layout.appendChild(pop);
-}
- 
-function loadDashboard(){
-  let alarm = 0, warning = 0, normal = 0;
-  const tbody = document.querySelector("#alarmTable tbody");
- 
-  data.forEach(item => {
-    createPopup(item);
- 
-    if(item.type === "Fault") alarm++;
-    else if(item.type === "Komorikoto") warning++;
-    else if(item.type === "Kaizen") normal++;
- 
-    const color = item.type === "Fault" ? "🔴" :
-                  item.type === "Komorikoto" ? "🟡" : "🟢";
- 
-    tbody.innerHTML += `
-      <tr>
-      <td>${item.area}</td>
-      <td>${color} ${item.type}</td>
-      <td>${item.detail}</td>
-    </tr>
-    `;
-  });
- 
-  document.getElementById("alarmCount").innerText = alarm;
-  document.getElementById("warningCount").innerText = warning;
-  document.getElementById("normalCount").innerText = normal;
-}
- 
-loadDashboard();
-</script>
-<body>
+  <script>
+    'use strict';
 
+    // ==================== ข้อมูลสิ่งผิดปกติ ====================
+    // เพิ่ม/แก้รายการตรงนี้ ถ้าไม่มีรายการให้ใช้ const data = [];
+    // areaCode เป็นตัวเลือก เช่น {areaCode:'7-7.2', area:'ชื่อพื้นที่', ...}
+    // ถ้าไม่ใส่ areaCode ระบบจะอ่านรหัสที่อยู่ต้นข้อความ area
+    const data = [
+      {area:'5-1รั้วยืด', type:'Fault', detail:'รั้วงอ'},
+      {area:'6-1ตู้แอร์เคลื่อนที่', type:'Fault', detail:'ถังรองน้ำแอร์ชำรุด'},
+      {area:'4-3ตู้เก็บอุปกรณ์ 5ส', type:'Fault', detail:'อุปกรณ์ไม่ครบ'},
+      {area:'4-7ตู้เก็บอุปกรณ์ Safety', type:'Fault', detail:'ตู้เก็บอุปกรณ์เก่า'},
+      {area:'6-3เครื่องปริ้น 3D', type:'Fault', detail:'พื้นที่ใหม่อุปกรณ์ไม่ตรงตามมาตรฐาน'},
+      {area:'7-2.4ที่จอดรถใส่อุปกรณ์ No.04', type:'Fault', detail:'ยังไม่มีป้ายบ่งชี้'},
+      {area:'ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.02', type:'Fault', detail:'ยังไม่มีรถเข็นใส่อุปกรณ์แบบลิ้นชัก อยู่ระหว่างรองบ'},
+      {area:'7-2.3ที่จอดรถใส่อุปกรณ์ No.03', type:'Fault', detail:'เอกสาร Part list ไม่ครบ'},
+      {area:'7-5ที่เก็บเครื่องปริ้นมาร์คสายไฟสว่านไฟฟ้า Rollสายไฟ-สายลม', type:'Fault', detail:'เอกสารไม่ครบ'},
+      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Fault', detail:'Min Stock Order'},
+      {area:'4-5ตู้เก็บของใช้สิ้นเปลือง3-4', type:'Fault', detail:'Min Stock Order'},
+      {area:'6-4แอร์ติดผนัง', type:'Fault', detail:'ยังไม่มีเอกสารแพลนการล้างแอร์'},
+      {area:'7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.03', type:'Fault', detail:'พื้นที่ใหม่ไม่มีเอกสาร'}
+    ];
+
+    // ==================== สี / เครื่องมือวาด ====================
+    const NS = 'http://www.w3.org/2000/svg';
+    const floors = document.getElementById('floorLayer');
+    const equipment = document.getElementById('equipmentLayer');
+    const tags = document.getElementById('tagLayer');
+    const COLORS = {
+      blue: '#62c9e9', purple: '#cf7ad2', yellow: '#fff21b', gray: '#b0b2b4',
+      orange: '#f6b48b', red: '#e85427', white: '#ffffff', green: '#9bd04e'
+    };
+    let tagNumber = 0;
+    let lastZoneTrigger = null;
+
+    function node(tag, attrs = {}, parent = equipment) {
+      const el = document.createElementNS(NS, tag);
+      Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, String(value)));
+      parent.appendChild(el);
+      return el;
+    }
+
+    function rect(x, y, width, height, fill = '#fff', parent = equipment, extra = {}) {
+      return node('rect', {x, y, width, height, fill, stroke: '#17212b', 'stroke-width': 1.8, ...extra}, parent);
+    }
+
+    function label(x, y, lines, size = 17, parent = equipment, extra = {}) {
+      const list = Array.isArray(lines) ? lines : String(lines).split('\n');
+      const lineHeight = size * 1.4;
+      const text = node('text', {
+        x, y, 'text-anchor': 'middle', 'dominant-baseline': 'central',
+        'font-size': size, fill: '#10151c', ...extra
+      }, parent);
+      list.forEach((line, i) => {
+        const tspan = node('tspan', {x, y: y + (i - (list.length - 1) / 2) * lineHeight}, text);
+        tspan.textContent = line;
+      });
+      return text;
+    }
+
+    function box(x, y, width, height, lines, options = {}) {
+      const group = node('g');
+      rect(x, y, width, height, options.fill || '#fff', group);
+      const title = node('title', {}, group);
+      title.textContent = (Array.isArray(lines) ? lines.join(' ') : lines);
+      const cx = x + width / 2, cy = y + height / 2;
+      label(cx, cy, lines, options.size || 16, group,
+        options.rotate ? {transform: `rotate(${options.rotate} ${cx} ${cy})`} : {});
+      return group;
+    }
+
+    // x / y = จุดกึ่งกลางลูกศร ทิศ up / down / left / right
+    function tag(code, name, x, y, color = 'blue', direction = 'up', width = 64, height = 42) {
+      const w = width / 2, h = height / 2;
+      const group = node('g', {
+        class: 'zone-button', tabindex: 0, role: 'button',
+        'aria-label': `พื้นที่ ${code} ${name}`, 'aria-haspopup': 'dialog',
+        'data-code': code, id: `zone-${++tagNumber}`, transform: `translate(${x} ${y})`
+      }, tags);
+      const title = node('title', {}, group);
+      title.textContent = `${code} · ${name}`;
+      let points, tx = 0, ty = 0;
+      if (direction === 'label') {
+        points = `${-w},${-h} ${w},${-h} ${w},${h} ${-w},${h}`;
+      } else if (direction === 'up') {
+        points = `${-w},${-h + 15} -10,${-h + 15} -10,${-h + 8} -19,${-h + 8} 0,${-h - 10} 19,${-h + 8} 10,${-h + 8} 10,${-h + 15} ${w},${-h + 15} ${w},${h} ${-w},${h}`;
+        ty = 8;
+      } else if (direction === 'down') {
+        points = `${-w},${-h} ${w},${-h} ${w},${h - 15} 10,${h - 15} 10,${h - 8} 19,${h - 8} 0,${h + 10} -19,${h - 8} -10,${h - 8} -10,${h - 15} ${-w},${h - 15}`;
+        ty = -7;
+      } else if (direction === 'right') {
+        points = `${-w},${-h} ${w - 16},${-h} ${w - 16},-7 ${w - 4},-7 ${w - 4},-15 ${w + 10},0 ${w - 4},15 ${w - 4},7 ${w - 16},7 ${w - 16},${h} ${-w},${h}`;
+        tx = -5;
+      } else {
+        points = `${w},${-h} ${-w + 16},${-h} ${-w + 16},-7 ${-w + 4},-7 ${-w + 4},-15 ${-w - 10},0 ${-w + 4},15 ${-w + 4},7 ${-w + 16},7 ${-w + 16},${h} ${w},${h}`;
+        tx = 5;
+      }
+      node('polygon', {points, fill: COLORS[color] || color, stroke: '#28343a', 'stroke-width': 2, class: 'tag-shape'}, group);
+      label(tx, ty, code, code.length > 4 ? 17 : 20, group);
+      group.addEventListener('click', () => openZone(code, name, group));
+      group.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault(); openZone(code, name, group);
+        }
+      });
+    }
+
+    function chair(x, y, direction = 0) {
+      const g = node('g', {transform: `translate(${x} ${y}) rotate(${direction})`});
+      node('circle', {r: 10, fill: '#eef4f7', stroke: '#668394', 'stroke-width': 2}, g);
+      node('path', {d: 'M -16 5 A 17 17 0 1 1 16 5', fill: 'none', stroke: '#668394', 'stroke-width': 3}, g);
+    }
+
+    // ==================== พื้น / ทางเดิน ====================
+    function drawFloor() {
+      rect(0, 0, 3200, 1120, '#fff', floors, {stroke: 'none'});
+      rect(40, 48, 2395, 225, '#fff814', floors, {stroke: '#6f91a4', 'stroke-width': 1});
+      label(1237, 160, 'Layout 5S Machine making center & AI section', 61, floors, {'font-weight': 'bold'});
+      rect(20, 320, 680, 720, '#fff', floors, {stroke: '#ef4141', 'stroke-dasharray': '11 7'});
+      rect(700, 320, 1625, 585, '#fff', floors, {stroke: '#ef4141', 'stroke-dasharray': '11 7'});
+      rect(2190, 320, 135, 585, '#087abe', floors);
+      rect(2340, 320, 145, 585, '#fff500', floors, {stroke: '#c9b700'});
+      node('line', {x1: 2412, y1: 335, x2: 2412, y2: 890, stroke: '#fff', 'stroke-width': 6, 'stroke-dasharray': '38 24'}, floors);
+      label(2412, 610, 'ทางเดิน', 26, floors, {transform: 'rotate(90 2412 610)'});
+      node('polygon', {
+        points: '2500,20 3170,20 3170,905 2600,905 2500,805',
+        fill: COLORS.green, stroke: '#1a2c20', 'stroke-width': 3
+      }, floors);
+      node('path', {d: 'M 2490 20 V 810 L 2596 916 H 3185', fill: 'none', stroke: '#ee9225', 'stroke-width': 14}, floors);
+      node('path', {d: 'M 2473 20 V 818 L 2588 934 H 3186 M 3181 20 V 918', fill: 'none', stroke: '#ef4141', 'stroke-width': 2, 'stroke-dasharray': '12 8'}, floors);
+      rect(2510, 212, 650, 14, '#fff', floors);
+      label(2620, 500, 'พื้นที่ประกอบ', 43, floors, {transform: 'rotate(90 2620 500)'});
+      label(2257, 575, ['↑', 'ทางเดินด้านหน้า', '↓'], 23, floors, {transform: 'rotate(-90 2257 575)'});
+      box(2190, 691, 135, 30, 'ทางเดินด้านหน้า', {fill: '#8dcc68', size: 14});
+      tag('1-1', 'ทางเดินด้านหน้า', 2257, 773, 'orange', 'up', 70, 45);
+    }
+
+    // ==================== สำนักงาน ====================
+    function drawOffice() {
+      box(33, 334, 82, 61, ['โต๊ะทำงาน', '11'], {size: 14});
+      box(33, 395, 82, 61, ['โต๊ะทำงาน', '10'], {size: 14});
+      chair(145, 365, 90); chair(145, 425, 90);
+      box(270, 325, 190, 40, 'Air ติดผนัง', {size: 18});
+      tag('6-4', 'แอร์ติดผนัง', 365, 412, 'purple', 'up');
+      box(460, 325, 110, 40, 'TV2', {size: 20});
+      tag('6-5', 'TV2', 515, 412, 'purple', 'up');
+      box(575, 390, 110, 47, 'เครื่องปริ้น 3D', {size: 14});
+      tag('6-3', 'เครื่องปริ้น 3D', 630, 345, 'purple', 'down');
+      box(603, 461, 82, 39, 'TV1', {size: 20});
+      tag('6-5', 'TV1', 644, 540, 'purple', 'up');
+      box(22, 567, 26, 214, 'ประตู', {size: 17, rotate: -90});
+      box(49, 567, 28, 109, 'กระจก', {size: 17, rotate: -90});
+      box(49, 676, 28, 105, 'ผ้าม่าน', {size: 17, rotate: -90});
+      tag('5-8', 'กระจกสำนักงานด้านซ้าย', 132, 621, 'blue', 'left', 77, 31);
+      tag('5-9', 'ผ้าม่านสำนักงานด้านซ้าย', 132, 731, 'blue', 'left', 77, 31);
+      box(667, 574, 28, 210, 'กระจกอะลูมิเนียม / ประตู', {size: 16, rotate: 90});
+      tag('5-8', 'กระจกอะลูมิเนียมด้านขวา', 605, 681, 'blue', 'right', 82, 32);
+      box(257, 665, 88, 59, ['โต๊ะทำงาน', '9'], {size: 14});
+      chair(301, 636, 0);
+      // แถวจากด้านบนลงล่าง: โต๊ะ 7–8, 5–6, 3–4, 1–2
+      [[7, 8], [5, 6], [3, 4], [1, 2]].forEach((pair, i) => {
+        const y = 730 + i * 60;
+        box(215, y, 83, 60, ['โต๊ะทำงาน', String(pair[0])], {size: 14});
+        box(298, y, 83, 60, ['โต๊ะทำงาน', String(pair[1])], {size: 14});
+        chair(184, y + 30, -90); chair(414, y + 30, 90);
+      });
+      box(618, 900, 66, 63, ['โต๊ะทำงาน', '12'], {size: 13});
+      box(618, 963, 66, 64, ['โต๊ะทำงาน', '13'], {size: 13});
+      chair(585, 932, -90); chair(585, 995, -90);
+      box(210, 990, 155, 32, 'กระจกอะลูมิเนียม', {size: 13});
+      box(365, 990, 108, 32, 'ผ้าม่าน', {size: 14});
+      box(210, 1022, 263, 18, 'หน้าต่าง', {size: 12});
+      tag('5-8', 'กระจกหน้าต่างสำนักงาน', 272, 1080, 'blue', 'up', 72, 36);
+      tag('5-9', 'ผ้าม่านหน้าต่างสำนักงาน', 420, 1080, 'blue', 'up', 72, 36);
+    }
+
+    // ==================== Machine Making ====================
+    function drawWorkshop() {
+      box(707, 325, 96, 79, ['ตู้เก็บของใช้', 'สิ้นเปลือง', '3–4'], {size: 15});
+      box(707, 404, 96, 79, ['ตู้เก็บของใช้', 'สิ้นเปลือง', '1–2'], {size: 15});
+      tag('4-5', 'ตู้เก็บของใช้สิ้นเปลือง 3–4', 857, 386, 'yellow', 'left', 70, 28);
+      tag('4-4', 'ตู้เก็บของใช้สิ้นเปลือง 1–2', 857, 449, 'yellow', 'left', 70, 28);
+      box(803, 325, 207, 55, 'แผงเก็บเครื่องมือ', {size: 16});
+      tag('7-3', 'แผงเก็บเครื่องมือ', 935, 421, 'gray', 'up');
+      box(1010, 325, 237, 55, 'ที่เก็บเครื่องมือวัด', {size: 16});
+      tag('7-4', 'ที่เก็บเครื่องมือวัด', 1128, 421, 'gray', 'up');
+      box(1247, 325, 238, 55, 'ชั้นเก็บอุปกรณ์สิ้นเปลือง 3', {size: 14});
+      tag('4-6', 'ชั้นเก็บอุปกรณ์สิ้นเปลือง 3', 1366, 421, 'yellow', 'up');
+      box(1485, 325, 340, 55, ['ที่เก็บเครื่องปริ้นมาร์คสายไฟ / สว่านไฟฟ้า', 'Roll สายไฟ–สายลม'], {size: 14});
+      tag('7-5', 'ที่เก็บเครื่องปริ้นมาร์คสายไฟ สว่านไฟฟ้า Roll สายไฟ–สายลม', 1655, 421, 'gray', 'up');
+      box(1825, 325, 140, 55, 'บอร์ด STW', {size: 17});
+      tag('6-2', 'บอร์ด STW', 1895, 421, 'blue', 'up');
+      box(1965, 325, 225, 43, 'บอร์ด Post Document', {size: 16});
+      tag('8-1', 'บอร์ด Post Document', 2076, 414, 'orange', 'up');
+      box(719, 830, 131, 75, ['ล็อกเกอร์ของใช้', 'ส่วนตัว'], {size: 15});
+      tag('9-1', 'ล็อกเกอร์ของใช้ส่วนตัว', 784, 782, 'red', 'down');
+      box(850, 864, 145, 41, 'ตู้เก็บอุปกรณ์ 5ส', {size: 14});
+      tag('4-3', 'ตู้เก็บอุปกรณ์ 5ส', 922, 816, 'yellow', 'down');
+      box(995, 833, 145, 72, ['ตู้เก็บอุปกรณ์', 'Safety'], {size: 16});
+      tag('4-7', 'ตู้เก็บอุปกรณ์ Safety', 1067, 785, 'yellow', 'down');
+      box(1140, 848, 140, 57, ['ที่เก็บอุปกรณ์', 'สำนักงาน'], {size: 14});
+      tag('4-2', 'ที่เก็บอุปกรณ์สำนักงาน', 1210, 799, 'yellow', 'down');
+      box(1280, 880, 255, 25, 'ที่แขวนหมวก Safety และหมวกผ้า', {size: 13});
+      tag('4-1', 'ที่แขวนหมวก Safety และหมวกผ้า', 1407, 833, 'yellow', 'down');
+      box(1740, 866, 215, 39, 'บอร์ด Training', {size: 16});
+      tag('5-3', 'บอร์ด Training', 1847, 819, 'blue', 'down');
+      box(1955, 862, 235, 43, 'Training Unit', {size: 19});
+      tag('6-2', 'Training Unit', 2072, 813, 'purple', 'down');
+
+      // รายการอาคาร / อุปกรณ์ส่วนกลาง ใต้กรอบ Machine Making
+      const facilities = [
+        ['5-4', 'พัดลม'], ['5-5', 'กล้องวงจรปิด / ไฟส่องสว่าง / ปลั๊กไฟ'],
+        ['5-6', 'ฝ้า / เพดาน / โรลสายลม'], ['5-7', 'พื้น / เอกสาร / ป้ายต่าง ๆ / แผ่นใส']
+      ];
+      facilities.forEach(([code, name], i) => {
+        const y = 932 + i * 40;
+        box(1780, y, 350, 40, name, {size: 14});
+        tag(code, name, 2193, y + 20, 'blue', 'left', 92, 34);
+      });
+    }
+
+    // ==================== พื้นที่ประกอบที่เพิ่มเข้ามา ====================
+    function drawAssembly() {
+      const topItems = [
+        {x: 2515, w: 105, name: ['ที่เก็บรถเข็น'], code: '7-1', color: 'gray', fill: '#64c8e6'},
+        {x: 2620, w: 100, name: ['ที่เก็บรถเข็น', 'เครื่องมือ'], code: '7-6', color: 'white', fill: '#f6b48b'},
+        {x: 2720, w: 105, name: ['ที่เก็บตู้แอร์', 'เคลื่อนที่'], code: '6-1', color: 'purple', fill: '#fff'},
+        {x: 2825, w: 95, name: ['โต๊ะปากกา'], code: '5-10', color: 'blue', fill: '#fff216'},
+        {x: 2920, w: 130, name: ['Power plug', 'เคลื่อนที่'], code: '5-13', color: 'blue', fill: '#ff4d49'},
+        {x: 3050, w: 110, name: ['ไฟส่องสว่าง'], code: '5-14', color: 'blue', fill: '#ff4d49'}
+      ];
+      topItems.forEach(item => {
+        box(item.x, 37, item.w, 74, item.name, {fill: item.fill, size: 14});
+        tag(item.code, item.name.join(' '), item.x + item.w / 2, 162, item.color, 'up', item.w - 25, 40);
+      });
+
+      // หนึ่งแถว = รถเข็น + รถเข็นลิ้นชัก + กล่องเครื่องมือ + Project Team
+      for (let i = 1; i <= 6; i++) {
+        const y = 239 + (i - 1) * 103;
+        const no = String(i).padStart(2, '0');
+        const cart = `ที่จอดรถใส่อุปกรณ์ No.${no}`;
+        const drawer = `ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.${no}`;
+        const toolbox = `ที่เก็บกล่องเครื่องมือ No.${no}`;
+        box(2875, y, 155, 34, ['ที่จอดรถใส่อุปกรณ์', `No.${no}`], {fill: '#65a9d9', size: 12});
+        box(2875, y + 34, 155, 40, ['รถเข็นอุปกรณ์แบบลิ้นชัก', `No.${no}`], {fill: '#f6b48b', size: 12});
+        box(2875, y + 74, 155, 29, `กล่องเครื่องมือ No.${no}`, {fill: '#dfa5d9', size: 12});
+        box(3030, y, 40, 103, '', {fill: COLORS.green});
+        box(3070, y, 90, 103, '', {fill: '#ffc417'});
+        label(3115, y + 57, ['ชิ้นงานใหม่', 'Project Team', `No.${no}`], 12.5);
+        tag(`7-2.${i}`, cart, 2805, y + 17, 'gray', 'right', 106, 28);
+        tag(`7-7.${i}`, drawer, 2805, y + 54, 'gray', 'right', 106, 28);
+        tag(`7-8.${i}`, toolbox, 2805, y + 88, 'gray', 'right', 106, 25);
+        tag(`4-8.${i}`, `ชิ้นงาน New Project Team No.${no}`, 3115, y + 13, 'yellow', 'label', 85, 25);
+        if (i < 6) rect(2868, y + 100, 297, 5, '#fff', equipment, {'stroke-width': 1});
+      }
+
+      box(2550, 752, 96, 142, ['โต๊ะ', 'ประกอบ', 'งาน 2'], {size: 19});
+      tag('5-15', 'โต๊ะประกอบงาน 2', 2598, 706, 'blue', 'down', 82, 52);
+      box(2646, 790, 98, 104, ['โต๊ะ', 'ประกอบ', 'งาน 1'], {size: 19});
+      tag('5-2', 'โต๊ะประกอบงาน 1', 2695, 746, 'blue', 'down', 82, 52);
+      box(3005, 857, 155, 39, 'Power plug', {fill: '#ff4d49', size: 17});
+      tag('5-12', 'Power plug', 3082, 953, 'blue', 'up', 90, 43);
+      box(2638, 934, 150, 44, 'รั้วยืด', {size: 20});
+      tag('5-11', 'รั้วยืด', 2713, 1020, 'blue', 'up', 90, 43);
+    }
+
+    // ==================== ดูรายละเอียดพื้นที่ ====================
+    function areaCode(item) {
+      if (item.areaCode) return String(item.areaCode).trim();
+      const match = String(item.area || '').trim().match(/^(\d+-\d+(?:\.\d+)?)/);
+      return match ? match[1] : '';
+    }
+
+    function typeClass(type) {
+      return ({Fault: 'fault', Komorikoto: 'warning', Kaizen: 'kaizen'})[type] || '';
+    }
+
+    function statusLabel(type) {
+      const span = document.createElement('span');
+      const cls = typeClass(type);
+      span.className = `status-label status-${cls}`;
+      if (cls) {
+        const dot = document.createElement('i');
+        dot.className = `dot dot-${cls}`;
+        dot.setAttribute('aria-hidden', 'true');
+        span.appendChild(dot);
+      }
+      span.appendChild(document.createTextNode(type || 'ไม่ระบุประเภท'));
+      return span;
+    }
+
+    function openZone(code, name, trigger) {
+      lastZoneTrigger = trigger;
+      document.getElementById('zoneCode').textContent = code;
+      document.getElementById('zoneName').textContent = name;
+      const reports = document.getElementById('zoneReports');
+      reports.replaceChildren();
+      const found = data.filter(item => areaCode(item) === code || (!areaCode(item) && item.area === name));
+      if (!found.length) {
+        const p = document.createElement('p');
+        p.textContent = 'ไม่มีรายการสิ่งผิดปกติของรหัสนี้ในข้อมูลที่แสดงอยู่';
+        reports.appendChild(p);
+      }
+      found.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'zone-report';
+        div.appendChild(statusLabel(item.type));
+        const p = document.createElement('p');
+        p.textContent = item.detail || '—';
+        div.appendChild(p);
+        reports.appendChild(div);
+      });
+      document.getElementById('zoneDialog').showModal();
+    }
+
+    // ==================== ตารางและตัวนับ ====================
+    function renderTable() {
+      const query = document.getElementById('areaSearch').value.trim().toLocaleLowerCase();
+      const selectedType = document.getElementById('typeFilter').value;
+      const tbody = document.getElementById('alarmTableBody');
+      tbody.replaceChildren();
+      const filtered = data.filter(item =>
+        (selectedType === 'all' || item.type === selectedType) &&
+        `${item.areaCode || ''} ${item.area || ''} ${item.detail || ''}`.toLocaleLowerCase().includes(query)
+      );
+      filtered.forEach(item => {
+        const tr = document.createElement('tr');
+        const area = document.createElement('td');
+        const type = document.createElement('td');
+        const detail = document.createElement('td');
+        area.textContent = item.area || '—';
+        type.appendChild(statusLabel(item.type));
+        detail.textContent = item.detail || '—';
+        tr.append(area, type, detail); tbody.appendChild(tr);
+      });
+      if (!filtered.length) {
+        const tr = document.createElement('tr'), td = document.createElement('td');
+        td.colSpan = 3; td.className = 'empty'; td.textContent = 'ไม่มีรายการที่ตรงกับเงื่อนไข';
+        tr.appendChild(td); tbody.appendChild(tr);
+      }
+    }
+
+    function loadDashboard() {
+      document.getElementById('alarmCount').textContent = data.filter(item => item.type === 'Fault').length;
+      document.getElementById('warningCount').textContent = data.filter(item => item.type === 'Komorikoto').length;
+      document.getElementById('normalCount').textContent = data.filter(item => item.type === 'Kaizen').length;
+      renderTable();
+    }
+
+    // เวลาไทย แม้เปิดจากคอมพิวเตอร์ที่ตั้งโซนเวลาอื่น
+    const clockFormatter = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    });
+    const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Bangkok', day: '2-digit', month: 'short', year: '2-digit'
+    });
+    function updateDateTime() {
+      const now = new Date();
+      const el = document.getElementById('currentDateTime');
+      el.replaceChildren(document.createTextNode(clockFormatter.format(now)), document.createElement('br'),
+        document.createTextNode(dateFormatter.format(now).replace(/ /g, '-')));
+    }
+
+    // ==================== ขยาย / เลือกดูเฉพาะพื้นที่ ====================
+    const viewBoxes = {
+      all: '0 0 3200 1120', office: '0 300 720 820',
+      workshop: '695 300 1640 820', assembly: '2465 0 735 1090'
+    };
+    let zoom = 1, selectedView = 'all';
+    function setZoom(value) {
+      zoom = Math.min(3, Math.max(1, value));
+      const svg = document.getElementById('layout');
+      const viewport = document.getElementById('mapViewport');
+      const bounds = viewBoxes[selectedView].split(' ').map(Number);
+      const fitWidth = selectedView === 'all' ? viewport.clientWidth : Math.min(
+        viewport.clientWidth, (window.innerHeight * 0.76 - 12) * bounds[2] / bounds[3]
+      );
+      svg.style.width = `${fitWidth * zoom}px`;
+      document.getElementById('zoomValue').value = `${Math.round(zoom * 100)}%`;
+      document.getElementById('zoomOut').disabled = zoom <= 1;
+      document.getElementById('zoomIn').disabled = zoom >= 3;
+    }
+    function selectView(view) {
+      selectedView = view;
+      document.getElementById('layout').setAttribute('viewBox', viewBoxes[view]);
+      document.querySelectorAll('[data-view]').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.view === view));
+      });
+      setZoom(1);
+      document.getElementById('mapViewport').scrollTo(0, 0);
+    }
+
+    drawFloor(); drawOffice(); drawWorkshop(); drawAssembly();
+    loadDashboard(); updateDateTime(); setInterval(updateDateTime, 1000); setZoom(1);
+    document.getElementById('areaSearch').addEventListener('input', renderTable);
+    document.getElementById('typeFilter').addEventListener('change', renderTable);
+    document.getElementById('zoomIn').addEventListener('click', () => setZoom(zoom + 0.25));
+    document.getElementById('zoomOut').addEventListener('click', () => setZoom(zoom - 0.25));
+    document.querySelectorAll('[data-view]').forEach(button => {
+      button.addEventListener('click', () => selectView(button.dataset.view));
+    });
+    const dialog = document.getElementById('zoneDialog');
+    document.getElementById('closeDialog').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener('close', () => { if (lastZoneTrigger) lastZoneTrigger.focus(); });
+    window.addEventListener('beforeprint', () => document.getElementById('layout').setAttribute('viewBox', viewBoxes.all));
+    window.addEventListener('afterprint', () => document.getElementById('layout').setAttribute('viewBox', viewBoxes[selectedView]));
+    window.addEventListener('resize', () => setZoom(zoom));
+  </script>
+</body>
 </html>
