@@ -72,7 +72,7 @@ html, body {
 
 .pdf-page {
     display: block;
-    margin: 0;
+    margin: 0 auto;
     background: white;
     box-shadow: none;
 }
@@ -243,24 +243,41 @@ async function loadPDF() {
             const canvas =
                 document.createElement("canvas");
 
-            canvas.className =
-                "pdf-page";
+                canvas.className = "pdf-page";
+
+                // เพิ่มความละเอียดในการ Render
+            const outputScale =
+                Math.max(window.devicePixelRatio || 1, 2.5);
 
             canvas.width =
-                Math.floor(viewport.width);
+                Math.floor(viewport.width * outputScale);
 
             canvas.height =
-                Math.floor(viewport.height);
+                Math.floor(viewport.height * outputScale);
 
-            container.appendChild(canvas);
+                // ขนาดที่แสดงจริงยังเท่าเดิม
+            canvas.style.width =
+                Math.floor(viewport.width) + "px";
 
-            const ctx =
-                canvas.getContext("2d");
+            canvas.style.height =
+                Math.floor(viewport.height) + "px";
 
-            await page.render({
-                canvasContext: ctx,
-                viewport: viewport
-            }).promise;
+container.appendChild(canvas);
+
+const ctx =
+    canvas.getContext("2d");
+
+const transform = [
+    outputScale, 0,
+    0, outputScale,
+    0, 0
+];
+
+await page.render({
+    canvasContext: ctx,
+    viewport: viewport,
+    transform: transform
+}).promise;
         }
 
         status.innerText =
