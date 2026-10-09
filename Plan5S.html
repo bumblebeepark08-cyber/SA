@@ -62,15 +62,19 @@ html, body {
 
 #pdfContainer {
     width: 100%;
-    padding: 8px;
+    height: calc(100vh - 55px);
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
 }
 
 .pdf-page {
     display: block;
-    margin: 0 auto 12px auto;
+    margin: 0;
     background: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,.25);
-    max-width: 100%;
+    box-shadow: none;
 }
 </style>
 
@@ -221,11 +225,15 @@ async function loadPDF() {
                 });
 
             const availableWidth =
-                window.innerWidth - 16;
+                window.innerWidth - 10;
 
-            const scale =
-                availableWidth /
-                original.width;
+            const availableHeight =
+                window.innerHeight - 65;
+
+            const scale = Math.min(
+                availableWidth / original.width,
+                availableHeight / original.height
+                );
 
             const viewport =
                 page.getViewport({
