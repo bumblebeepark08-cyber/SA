@@ -7,98 +7,57 @@
 <title>Plan 5S</title>
 
 <style>
-* {
-    box-sizing: border-box;
+*{
+    box-sizing:border-box;
 }
 
-html, body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    font-family: Arial, Tahoma, sans-serif;
-    background: #e9edf2;
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:Arial,Tahoma,sans-serif;
+    background:#e9edf2;
 }
 
-.topbar {
-    height: 55px;
-    background: #12377a;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 15px;
+.topbar{
+    height:55px;
+    background:#12377a;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 15px;
+    color:white;
 }
 
-.topbar h1 {
-    margin: 0;
-    font-size: 22px;
+.topbar h1{
+    margin:0;
+    font-size:24px;
 }
 
-.btn {
-    border: 0;
-    border-radius: 6px;
-    padding: 9px 18px;
-    cursor: pointer;
-    font-size: 15px;
+.btn{
+    border:0;
+    border-radius:6px;
+    padding:9px 18px;
+    cursor:pointer;
+    font-size:15px;
 }
 
-.back {
-    background: white;
-    color: #12377a;
+.back{
+    background:white;
+    color:#12377a;
 }
 
-.refresh {
-    background: #107c41;
-    color: white;
+.refresh{
+    background:#107c41;
+    color:white;
 }
 
-.viewer {
-    width: 100%;
-    height: calc(100vh - 55px);
-    overflow: auto;
-    position: relative;
-    background: #d9dde2;
-}
-
-.fit-area {
-    position: relative;
-    transform-origin: top left;
-}
-
-.plan-canvas {
-    position: relative;
-    background: white;
-}
-
-.background-image {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-.overlay-image {
-    position: absolute;
-    object-fit: fill;
-}
-
-.loading {
-    position: fixed;
-    top: 70px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
-    padding: 12px 25px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,.2);
-    z-index: 9999;
-}
-
-.status {
-    font-size: 13px;
+#pdfFrame{
+    width:100%;
+    height:calc(100vh - 55px);
+    border:0;
+    display:block;
 }
 </style>
 </head>
@@ -114,184 +73,34 @@ html, body {
 
     <h1>Plan 5S</h1>
 
-    <div>
-        <span class="status" id="status"></span>
-
-        <button class="btn refresh"
-            onclick="loadPlan5S()">
-            Refresh
-        </button>
-    </div>
+    <button class="btn refresh"
+        onclick="refreshPDF()">
+        Refresh
+    </button>
 
 </div>
 
-<div class="loading" id="loading">
-    กำลังโหลด Plan 5S...
-</div>
-
-<div class="viewer" id="viewer">
-
-    <div class="fit-area" id="fitArea">
-
-        <div class="plan-canvas" id="planCanvas"></div>
-
-    </div>
-
-</div>
+<iframe
+    id="pdfFrame"
+    src="">
+</iframe>
 
 <script>
 
-const DATA_URL =
-"https://raw.githubusercontent.com/bumblebeepark08-cyber/SA/data/data/plan5s.json";
+const PDF_URL =
+"https://raw.githubusercontent.com/bumblebeepark08-cyber/SA/data/data/plan5s.pdf";
 
-let currentWidth = 0;
-let currentHeight = 0;
+function refreshPDF(){
 
-async function loadPlan5S() {
-
-    const loading = document.getElementById("loading");
-    const canvas = document.getElementById("planCanvas");
-    const status = document.getElementById("status");
-
-    loading.style.display = "block";
-
-    try {
-
-        const response = await fetch(
-            DATA_URL + "?t=" + Date.now(),
-            { cache: "no-store" }
-        );
-
-        if (!response.ok) {
-            throw new Error("ไม่สามารถโหลดข้อมูลได้");
-        }
-
-        const result = await response.json();
-
-        currentWidth = result.width;
-        currentHeight = result.height;
-
-        canvas.innerHTML = "";
-
-        canvas.style.width = result.width + "px";
-        canvas.style.height = result.height + "px";
-
-        // ภาพตาราง Excel
-        const background = document.createElement("img");
-
-        background.className = "background-image";
-
-        background.src =
-            "data:image/png;base64," +
-            result.background;
-
-        canvas.appendChild(background);
-
-
-        // รูปคน / Shape ต่าง ๆ
-        if (Array.isArray(result.overlays)) {
-
-            result.overlays
-                .sort((a, b) =>
-                    (a.zIndex || 0) - (b.zIndex || 0)
-                )
-                .forEach(item => {
-
-                    const img =
-                        document.createElement("img");
-
-                    img.className = "overlay-image";
-
-                    img.src =
-                        "data:image/png;base64," +
-                        item.image;
-
-                    img.style.left =
-                        item.left + "px";
-
-                    img.style.top =
-                        item.top + "px";
-
-                    img.style.width =
-                        item.width + "px";
-
-                    img.style.height =
-                        item.height + "px";
-
-                    canvas.appendChild(img);
-
-                });
-
-        }
-
-        fitToScreen();
-
-        status.textContent =
-            "Update " +
-            new Date().toLocaleTimeString("th-TH");
-
-        loading.style.display = "none";
-
-    }
-    catch (error) {
-
-        loading.textContent =
-            "โหลดข้อมูลไม่สำเร็จ: " +
-            error.message;
-
-    }
+    document.getElementById("pdfFrame").src =
+        PDF_URL + "?t=" + Date.now();
 
 }
 
+refreshPDF();
 
-function fitToScreen() {
-
-    if (!currentWidth || !currentHeight) {
-        return;
-    }
-
-    const viewer =
-        document.getElementById("viewer");
-
-    const fitArea =
-        document.getElementById("fitArea");
-
-    const availableWidth =
-        viewer.clientWidth;
-
-    const scale =
-        Math.min(
-            availableWidth / currentWidth,
-            1
-        );
-
-    fitArea.style.width =
-        currentWidth + "px";
-
-    fitArea.style.height =
-        (currentHeight * scale) + "px";
-
-    fitArea.style.transform =
-        "scale(" + scale + ")";
-
-}
-
-
-window.addEventListener(
-    "resize",
-    fitToScreen
-);
-
-
-/* โหลดครั้งแรก */
-loadPlan5S();
-
-
-/* โหลดข้อมูลใหม่ทุก 60 วินาที */
-setInterval(
-    loadPlan5S,
-    60000
-);
+/* เช็ก PDF ใหม่ทุก 5 นาที */
+setInterval(refreshPDF, 300000);
 
 </script>
 
