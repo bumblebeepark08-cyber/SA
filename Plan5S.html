@@ -3,30 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Plan 5S</title>
 
 <style>
-* { box-sizing: border-box; }
-
-html, body {
-    margin: 0;
-    width: 100%;
-    min-height: 100%;
-    font-family: Arial, Tahoma, sans-serif;
-    background: #d9dde2;
+* {
+    box-sizing: border-box;
 }
 
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, Tahoma, sans-serif;
+    background: #d8dde3;
+    overflow: hidden;
+}
+
+/* =========================
+   HEADER
+========================= */
+
 .topbar {
-    height: 55px;
+    height: 58px;
     background: #1a4385;
     color: white;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 15px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+
+    padding: 0 14px;
+
+    box-shadow: 0 2px 5px rgba(0,0,0,.25);
+
+    position: relative;
+    z-index: 1000;
 }
 
 .topbar h1 {
@@ -34,85 +47,258 @@ html, body {
     font-size: 24px;
 }
 
-.btn {
-    border: 0;
-    border-radius: 6px;
-    padding: 9px 18px;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
+.left-tools,
+.right-tools {
+    display: flex;
+    align-items: center;
+    gap: 7px;
 }
 
-.back {
+.btn {
+    border: none;
+    border-radius: 6px;
+
+    padding: 8px 14px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    cursor: pointer;
+
     background: white;
     color: #1a4385;
 }
 
-.refresh {
+.btn:hover {
+    opacity: .88;
+}
+
+.btn-green {
     background: #107c41;
     color: white;
 }
 
-#status {
-    text-align: center;
-    padding: 10px;
-    font-weight: bold;
-    background: #fff3cd;
+.btn-blue {
+    background: #0d6efd;
+    color: white;
 }
 
-#pdfContainer {
+
+/* =========================
+   VIEWER
+========================= */
+
+#viewer {
     width: 100%;
-    height: calc(100vh - 55px);
-    padding: 0;
+    height: calc(100vh - 58px);
+
+    overflow: auto;
+
+    background: #b7bcc2;
+
+    padding: 8px;
+}
+
+
+/* =========================
+   PDF CANVAS
+========================= */
+
+#pdfContainer {
+    width: max-content;
+    min-width: 100%;
+
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    overflow: hidden;
+
+    gap: 12px;
 }
 
 .pdf-page {
     display: block;
-    margin: 0 auto;
+
     background: white;
-    box-shadow: none;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,.30);
+
+    image-rendering: auto;
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+#status {
+    position: fixed;
+
+    top: 70px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    z-index: 9999;
+
+    background: rgba(255,255,255,.97);
+
+    border-radius: 8px;
+
+    padding: 10px 18px;
+
+    box-shadow: 0 3px 12px rgba(0,0,0,.25);
+
+    font-weight: bold;
+}
+
+
+/* =========================
+   FULL SCREEN
+========================= */
+
+:fullscreen #viewer {
+    height: calc(100vh - 58px);
 }
 </style>
 
+
+<!-- PDF.JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
 </head>
 
 <body>
 
+
+<!-- =========================
+     HEADER
+========================= -->
+
 <div class="topbar">
 
-    <button class="btn back"
-        onclick="window.location.href='3Pillars.html'">
-        ← Back
-    </button>
+    <div class="left-tools">
+
+        <button
+            class="btn"
+            onclick="window.location.href='3Pillars.html'">
+            ← Back
+        </button>
+
+    </div>
+
 
     <h1>Plan 5S</h1>
 
-    <button class="btn refresh"
-        onclick="loadPDF()">
-        Refresh
-    </button>
+
+    <div class="right-tools">
+
+        <button
+            class="btn"
+            onclick="zoomOut()">
+            −
+        </button>
+
+        <button
+            class="btn"
+            onclick="zoomIn()">
+            +
+        </button>
+
+        <button
+            class="btn btn-blue"
+            onclick="setFitWidth()">
+            Fit Width
+        </button>
+
+        <button
+            class="btn"
+            onclick="setFitPage()">
+            Fit Page
+        </button>
+
+        <button
+            class="btn"
+            onclick="toggleFullScreen()">
+            Full Screen
+        </button>
+
+        <button
+            class="btn btn-green"
+            onclick="reloadPDF()">
+            Refresh
+        </button>
+
+    </div>
 
 </div>
+
+
+<!-- =========================
+     STATUS
+========================= -->
 
 <div id="status">
-    PDF.JS MODE — กำลังโหลด Plan 5S...
+    กำลังโหลด Plan 5S...
 </div>
 
-<div id="pdfContainer"></div>
+
+<!-- =========================
+     PDF AREA
+========================= -->
+
+<div id="viewer">
+
+    <div id="pdfContainer"></div>
+
+</div>
+
 
 <script>
+
+/* ============================================================
+   PDF.JS SETTING
+============================================================ */
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
+
+/* ============================================================
+   GITHUB
+============================================================ */
+
 const API_URL =
 "https://api.github.com/repos/bumblebeepark08-cyber/SA/contents/data/plan5s.pdf?ref=data";
 
+
+/* ============================================================
+   GLOBAL
+============================================================ */
+
+let pdfDocument = null;
+
+let zoomMode = "width";
+
+let manualZoom = 1;
+
+let renderVersion = 0;
+
+
+/*
+    ยิ่งสูงยิ่งคม
+
+    2   = คม
+    2.5 = คมมาก
+    3   = คมมากที่สุด แต่ใช้ RAM มากขึ้น
+*/
+
+const QUALITY = 3;
+
+
+/* ============================================================
+   DOWNLOAD PDF FROM GITHUB
+============================================================ */
 
 async function getPDFBytes() {
 
@@ -120,21 +306,32 @@ async function getPDFBytes() {
         API_URL + "&t=" + Date.now(),
         {
             cache: "no-store",
+
             headers: {
                 "Accept": "application/vnd.github+json"
             }
         }
     );
 
+
     if (!response.ok) {
+
         throw new Error(
-            "GitHub API " + response.status
+            "GitHub API Error " +
+            response.status
         );
+
     }
 
-    const file = await response.json();
 
-    // ถ้า GitHub ส่ง content แบบ Base64 มา
+    const file =
+        await response.json();
+
+
+    /*
+       GitHub คืน Base64
+    */
+
     if (file.content) {
 
         const base64 =
@@ -144,162 +341,542 @@ async function getPDFBytes() {
             atob(base64);
 
         const bytes =
-            new Uint8Array(binary.length);
+            new Uint8Array(
+                binary.length
+            );
 
-        for (let i = 0; i < binary.length; i++) {
+
+        for (
+            let i = 0;
+            i < binary.length;
+            i++
+        ) {
+
             bytes[i] =
                 binary.charCodeAt(i);
+
         }
 
+
         return bytes;
+
     }
 
-    // กรณีไฟล์ใหญ่ GitHub อาจไม่คืน content
+
+    /*
+       กรณี GitHub ไม่คืน content
+    */
+
     if (file.download_url) {
 
         const pdfResponse =
             await fetch(
                 file.download_url +
-                "?t=" + Date.now(),
-                { cache: "no-store" }
+                "?t=" +
+                Date.now(),
+
+                {
+                    cache: "no-store"
+                }
             );
+
 
         if (!pdfResponse.ok) {
+
             throw new Error(
-                "โหลด PDF " +
+                "PDF Error " +
                 pdfResponse.status
             );
+
         }
 
-        const buffer =
-            await pdfResponse.arrayBuffer();
 
-        return new Uint8Array(buffer);
+        const buffer =
+            await pdfResponse
+                .arrayBuffer();
+
+
+        return new Uint8Array(
+            buffer
+        );
+
     }
 
+
     throw new Error(
-        "GitHub ไม่ส่งข้อมูล PDF กลับมา"
+        "ไม่พบข้อมูล PDF"
     );
+
 }
 
+
+/* ============================================================
+   LOAD PDF
+============================================================ */
 
 async function loadPDF() {
 
     const status =
-        document.getElementById("status");
+        document.getElementById(
+            "status"
+        );
 
-    const container =
-        document.getElementById("pdfContainer");
 
-    status.style.display = "block";
-    status.style.color = "#000";
+    status.style.display =
+        "block";
+
+    status.style.color =
+        "#111";
+
     status.innerText =
-        "PDF.JS MODE — กำลังโหลด Plan 5S...";
+        "กำลังโหลด Plan 5S...";
 
-    container.innerHTML = "";
 
     try {
 
-        const pdfBytes =
+        const bytes =
             await getPDFBytes();
 
-        const pdf =
+
+        pdfDocument =
             await pdfjsLib
                 .getDocument({
-                    data: pdfBytes
+                    data: bytes
                 })
                 .promise;
 
-        for (
-            let pageNo = 1;
-            pageNo <= pdf.numPages;
-            pageNo++
-        ) {
 
-            const page =
-                await pdf.getPage(pageNo);
+        await renderPDF();
 
-            const original =
-                page.getViewport({
-                    scale: 1
-                });
-
-            const availableWidth =
-                window.innerWidth - 10;
-
-            const availableHeight =
-                window.innerHeight - 65;
-
-            const scale = Math.min(
-                availableWidth / original.width,
-                availableHeight / original.height
-                );
-
-            const viewport =
-                page.getViewport({
-                    scale: scale
-                });
-
-            const canvas =
-                document.createElement("canvas");
-
-                canvas.className = "pdf-page";
-
-                // เพิ่มความละเอียดในการ Render
-            const outputScale =
-                Math.max(window.devicePixelRatio || 1, 2.5);
-
-            canvas.width =
-                Math.floor(viewport.width * outputScale);
-
-            canvas.height =
-                Math.floor(viewport.height * outputScale);
-
-                // ขนาดที่แสดงจริงยังเท่าเดิม
-            canvas.style.width =
-                Math.floor(viewport.width) + "px";
-
-            canvas.style.height =
-                Math.floor(viewport.height) + "px";
-
-container.appendChild(canvas);
-
-const ctx =
-    canvas.getContext("2d");
-
-const transform = [
-    outputScale, 0,
-    0, outputScale,
-    0, 0
-];
-
-await page.render({
-    canvasContext: ctx,
-    viewport: viewport,
-    transform: transform
-}).promise;
-        }
 
         status.innerText =
-            "Plan 5S โหลดสำเร็จ ✓";
+            "โหลดสำเร็จ ✓";
+
 
         setTimeout(() => {
-            status.style.display = "none";
-        }, 1500);
+
+            status.style.display =
+                "none";
+
+        }, 1200);
 
     }
+
     catch (error) {
 
         console.error(error);
 
-        status.style.color = "red";
+
+        status.style.color =
+            "red";
+
 
         status.innerText =
-            "ERROR : " + error.message;
+            "ERROR : " +
+            error.message;
+
     }
+
 }
 
+
+/* ============================================================
+   SCALE
+============================================================ */
+
+function getDisplayScale(page) {
+
+    const viewer =
+        document.getElementById(
+            "viewer"
+        );
+
+
+    const base =
+        page.getViewport({
+            scale: 1
+        });
+
+
+    /*
+       Fit Width
+       เหมาะสำหรับอ่านข้อมูล
+    */
+
+    if (zoomMode === "width") {
+
+        return (
+            (viewer.clientWidth - 28)
+            /
+            base.width
+        ) * manualZoom;
+
+    }
+
+
+    /*
+       Fit Page
+       เห็นทั้งหน้า
+    */
+
+    if (zoomMode === "page") {
+
+        const scaleWidth =
+            (viewer.clientWidth - 28)
+            /
+            base.width;
+
+
+        const scaleHeight =
+            (viewer.clientHeight - 20)
+            /
+            base.height;
+
+
+        return Math.min(
+            scaleWidth,
+            scaleHeight
+        ) * manualZoom;
+
+    }
+
+
+    return manualZoom;
+
+}
+
+
+/* ============================================================
+   RENDER
+============================================================ */
+
+async function renderPDF() {
+
+    if (!pdfDocument) {
+        return;
+    }
+
+
+    const myVersion =
+        ++renderVersion;
+
+
+    const container =
+        document.getElementById(
+            "pdfContainer"
+        );
+
+
+    container.innerHTML =
+        "";
+
+
+    for (
+        let pageNumber = 1;
+        pageNumber <= pdfDocument.numPages;
+        pageNumber++
+    ) {
+
+
+        if (
+            myVersion !==
+            renderVersion
+        ) {
+            return;
+        }
+
+
+        const page =
+            await pdfDocument
+                .getPage(
+                    pageNumber
+                );
+
+
+        /*
+           ขนาดบนหน้าจอ
+        */
+
+        const displayScale =
+            getDisplayScale(page);
+
+
+        const displayViewport =
+            page.getViewport({
+                scale:
+                    displayScale
+            });
+
+
+        /*
+           Render ความละเอียดสูง
+        */
+
+        const pixelRatio =
+            Math.max(
+                window.devicePixelRatio || 1,
+                QUALITY
+            );
+
+
+        const renderViewport =
+            page.getViewport({
+
+                scale:
+                    displayScale *
+                    pixelRatio
+
+            });
+
+
+        const canvas =
+            document.createElement(
+                "canvas"
+            );
+
+
+        canvas.className =
+            "pdf-page";
+
+
+        /*
+           ความละเอียดจริง
+        */
+
+        canvas.width =
+            Math.floor(
+                renderViewport.width
+            );
+
+
+        canvas.height =
+            Math.floor(
+                renderViewport.height
+            );
+
+
+        /*
+           ขนาดที่เห็นบนหน้าจอ
+        */
+
+        canvas.style.width =
+            Math.floor(
+                displayViewport.width
+            ) + "px";
+
+
+        canvas.style.height =
+            Math.floor(
+                displayViewport.height
+            ) + "px";
+
+
+        container.appendChild(
+            canvas
+        );
+
+
+        const ctx =
+            canvas.getContext(
+                "2d",
+                {
+                    alpha: false
+                }
+            );
+
+
+        ctx.imageSmoothingEnabled =
+            true;
+
+
+        ctx.imageSmoothingQuality =
+            "high";
+
+
+        await page.render({
+
+            canvasContext:
+                ctx,
+
+            viewport:
+                renderViewport
+
+        }).promise;
+
+    }
+
+}
+
+
+/* ============================================================
+   ZOOM
+============================================================ */
+
+async function zoomIn() {
+
+    zoomMode =
+        "width";
+
+    manualZoom +=
+        0.15;
+
+
+    if (
+        manualZoom >
+        2.5
+    ) {
+        manualZoom = 2.5;
+    }
+
+
+    await renderPDF();
+
+}
+
+
+async function zoomOut() {
+
+    manualZoom -=
+        0.15;
+
+
+    if (
+        manualZoom <
+        0.5
+    ) {
+        manualZoom = 0.5;
+    }
+
+
+    await renderPDF();
+
+}
+
+
+/* ============================================================
+   FIT WIDTH
+============================================================ */
+
+async function setFitWidth() {
+
+    zoomMode =
+        "width";
+
+    manualZoom =
+        1;
+
+
+    await renderPDF();
+
+}
+
+
+/* ============================================================
+   FIT PAGE
+============================================================ */
+
+async function setFitPage() {
+
+    zoomMode =
+        "page";
+
+    manualZoom =
+        1;
+
+
+    await renderPDF();
+
+}
+
+
+/* ============================================================
+   REFRESH
+============================================================ */
+
+async function reloadPDF() {
+
+    pdfDocument =
+        null;
+
+
+    await loadPDF();
+
+}
+
+
+/* ============================================================
+   FULL SCREEN
+============================================================ */
+
+async function toggleFullScreen() {
+
+    if (
+        !document.fullscreenElement
+    ) {
+
+        await document
+            .documentElement
+            .requestFullscreen();
+
+    }
+
+    else {
+
+        await document
+            .exitFullscreen();
+
+    }
+
+
+    setTimeout(
+        renderPDF,
+        300
+    );
+
+}
+
+
+/* ============================================================
+   RESIZE
+============================================================ */
+
+let resizeTimer;
+
+
+window.addEventListener(
+    "resize",
+    function() {
+
+        clearTimeout(
+            resizeTimer
+        );
+
+
+        resizeTimer =
+            setTimeout(
+                renderPDF,
+                300
+            );
+
+    }
+);
+
+
+/* ============================================================
+   START
+============================================================ */
+
 loadPDF();
+
+
+/*
+   Refresh PDF อัตโนมัติทุก 5 นาที
+*/
+
+setInterval(
+    reloadPDF,
+    300000
+);
 
 </script>
 
