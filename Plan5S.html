@@ -3,83 +3,78 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Plan 5S</title>
 
 <style>
-*{
-    box-sizing:border-box;
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+    font-family: Arial, Tahoma, sans-serif;
+    background: #d9dde2;
 }
 
-html,body{
-    margin:0;
-    width:100%;
-    min-height:100%;
-    font-family:Arial,Tahoma,sans-serif;
-    background:#dfe3e8;
+.topbar {
+    height: 55px;
+    background: #1a4385;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-.topbar{
-    height:55px;
-    background:#1a4385;
-    color:white;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 15px;
-    position:sticky;
-    top:0;
-    z-index:1000;
+.topbar h1 {
+    margin: 0;
+    font-size: 24px;
 }
 
-.topbar h1{
-    margin:0;
-    font-size:24px;
+.btn {
+    border: 0;
+    border-radius: 6px;
+    padding: 9px 18px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
 }
 
-.btn{
-    border:0;
-    border-radius:6px;
-    padding:9px 18px;
-    cursor:pointer;
-    font-weight:bold;
+.back {
+    background: white;
+    color: #1a4385;
 }
 
-.back{
-    background:white;
-    color:#1a4385;
+.refresh {
+    background: #107c41;
+    color: white;
 }
 
-.refresh{
-    background:#107c41;
-    color:white;
+#status {
+    text-align: center;
+    padding: 10px;
+    font-weight: bold;
+    background: #fff3cd;
 }
 
-#status{
-    position:fixed;
-    top:70px;
-    left:50%;
-    transform:translateX(-50%);
-    background:white;
-    padding:12px 20px;
-    border-radius:8px;
-    box-shadow:0 2px 10px rgba(0,0,0,.25);
-    z-index:9999;
+#pdfContainer {
+    width: 100%;
+    padding: 8px;
 }
 
-#pdfContainer{
-    width:100%;
-    padding:8px;
-    text-align:center;
-}
-
-.pdf-page{
-    display:block;
-    margin:0 auto 12px auto;
-    background:white;
-    box-shadow:0 2px 8px rgba(0,0,0,.2);
+.pdf-page {
+    display: block;
+    margin: 0 auto 12px auto;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    max-width: 100%;
 }
 </style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 
 <body>
@@ -101,26 +96,90 @@ html,body{
 </div>
 
 <div id="status">
-กำลังโหลด Plan 5S...
+    PDF.JS MODE — กำลังโหลด Plan 5S...
 </div>
 
 <div id="pdfContainer"></div>
 
-
-<script type="module">
-
-import * as pdfjsLib from
-"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
+<script>
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
-
+"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 const API_URL =
 "https://api.github.com/repos/bumblebeepark08-cyber/SA/contents/data/plan5s.pdf?ref=data";
 
 
-window.loadPDF = async function(){
+async function getPDFBytes() {
+
+    const response = await fetch(
+        API_URL + "&t=" + Date.now(),
+        {
+            cache: "no-store",
+            headers: {
+                "Accept": "application/vnd.github+json"
+            }
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            "GitHub API " + response.status
+        );
+    }
+
+    const file = await response.json();
+
+    // ถ้า GitHub ส่ง content แบบ Base64 มา
+    if (file.content) {
+
+        const base64 =
+            file.content.replace(/\n/g, "");
+
+        const binary =
+            atob(base64);
+
+        const bytes =
+            new Uint8Array(binary.length);
+
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] =
+                binary.charCodeAt(i);
+        }
+
+        return bytes;
+    }
+
+    // กรณีไฟล์ใหญ่ GitHub อาจไม่คืน content
+    if (file.download_url) {
+
+        const pdfResponse =
+            await fetch(
+                file.download_url +
+                "?t=" + Date.now(),
+                { cache: "no-store" }
+            );
+
+        if (!pdfResponse.ok) {
+            throw new Error(
+                "โหลด PDF " +
+                pdfResponse.status
+            );
+        }
+
+        const buffer =
+            await pdfResponse.arrayBuffer();
+
+        return new Uint8Array(buffer);
+    }
+
+    throw new Error(
+        "GitHub ไม่ส่งข้อมูล PDF กลับมา"
+    );
+}
+
+
+async function loadPDF() {
 
     const status =
         document.getElementById("status");
@@ -129,50 +188,37 @@ window.loadPDF = async function(){
         document.getElementById("pdfContainer");
 
     status.style.display = "block";
-    status.style.color = "black";
-    status.innerText = "กำลังโหลด Plan 5S...";
+    status.style.color = "#000";
+    status.innerText =
+        "PDF.JS MODE — กำลังโหลด Plan 5S...";
 
     container.innerHTML = "";
 
-    try{
+    try {
 
-        // โหลด PDF เป็น binary ผ่าน GitHub API
-        const response = await fetch(API_URL,{
-            cache:"no-store",
-            headers:{
-                "Accept":"application/vnd.github.raw"
-            }
-        });
-
-        if(!response.ok){
-            throw new Error(
-                "GitHub Error " + response.status
-            );
-        }
-
-        const buffer =
-            await response.arrayBuffer();
-
-        const pdfData =
-            new Uint8Array(buffer);
+        const pdfBytes =
+            await getPDFBytes();
 
         const pdf =
             await pdfjsLib
-                .getDocument({data:pdfData})
+                .getDocument({
+                    data: pdfBytes
+                })
                 .promise;
 
-
-        for(
-            let pageNumber = 1;
-            pageNumber <= pdf.numPages;
-            pageNumber++
-        ){
+        for (
+            let pageNo = 1;
+            pageNo <= pdf.numPages;
+            pageNo++
+        ) {
 
             const page =
-                await pdf.getPage(pageNumber);
+                await pdf.getPage(pageNo);
 
             const original =
-                page.getViewport({scale:1});
+                page.getViewport({
+                    scale: 1
+                });
 
             const availableWidth =
                 window.innerWidth - 16;
@@ -182,12 +228,15 @@ window.loadPDF = async function(){
                 original.width;
 
             const viewport =
-                page.getViewport({scale:scale});
+                page.getViewport({
+                    scale: scale
+                });
 
             const canvas =
                 document.createElement("canvas");
 
-            canvas.className = "pdf-page";
+            canvas.className =
+                "pdf-page";
 
             canvas.width =
                 Math.floor(viewport.width);
@@ -197,37 +246,33 @@ window.loadPDF = async function(){
 
             container.appendChild(canvas);
 
-            const context =
+            const ctx =
                 canvas.getContext("2d");
 
             await page.render({
-                canvasContext:context,
-                viewport:viewport
+                canvasContext: ctx,
+                viewport: viewport
             }).promise;
-
         }
 
         status.innerText =
-            "โหลดสำเร็จ ✓";
+            "Plan 5S โหลดสำเร็จ ✓";
 
-        setTimeout(()=>{
-            status.style.display="none";
-        },1000);
+        setTimeout(() => {
+            status.style.display = "none";
+        }, 1500);
 
     }
-    catch(error){
+    catch (error) {
 
         console.error(error);
 
-        status.style.color="red";
+        status.style.color = "red";
 
         status.innerText =
-            "โหลด PDF ไม่สำเร็จ : " +
-            error.message;
+            "ERROR : " + error.message;
     }
-
 }
-
 
 loadPDF();
 
