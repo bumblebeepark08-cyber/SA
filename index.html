@@ -302,6 +302,14 @@
       }
       node('polygon', {points, fill: COLORS[color] || color, stroke: '#28343a', 'stroke-width': 2, class: 'tag-shape'}, group);
       label(tx, ty, code, code.length > 4 ? 17 : 20, group);
+      // ดอทสีแดงเหนือป้าย 6-1 ตามตำแหน่งที่กำหนด
+      if (code === '6-1') {
+        node('circle', {
+          cx: 0, cy: -h - 15, r: 14,
+          fill: '#ff0000', stroke: '#ffffff', 'stroke-width': 3,
+          class: 'zone-red-dot', 'aria-hidden': 'true'
+        }, group);
+      }
       group.addEventListener('click', () => openZone(code, name, group));
       group.addEventListener('keydown', event => {
         if (event.key === 'Enter' || event.key === ' ') {
