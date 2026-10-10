@@ -232,12 +232,14 @@
     // areaCode เป็นตัวเลือก เช่น {areaCode:'7-7.2', area:'ชื่อพื้นที่', ...}
     // ถ้าไม่ใส่ areaCode ระบบจะอ่านรหัสที่อยู่ต้นข้อความ area
     // type ใช้ Countermeasure หรือ Kaizen; Fault เดิมจะแสดงและนับเป็น Countermeasure
+    // responsible = ชื่อผู้รับผิดชอบ เช่น responsible:'ชื่อ นามสกุล'
+    // ถ้ายังไม่กำหนดผู้รับผิดชอบให้เว้นเป็น '' ระบบจะแสดง —
     // foundDate = วันที่พบปัญหา / plannedDate = วันที่วางแผนแก้ไขเสร็จ
     // กรอกวันที่รูปแบบ YYYY-MM-DD (ปี ค.ศ.) แล้วหน้าจอจะแสดงเป็น DD/MM/YYYY
     // ตัวอย่างรูปแบบเท่านั้น: foundDate:'2026-10-10', plannedDate:'2026-10-20'
     // ยังไม่ทราบวันที่ให้เว้นเป็น '' ระบบจะแสดง — โดยไม่กำหนดวันที่ให้เอง
     const data = [
-      {area:'5-2โต๊ะประกอบงาน1', type:'Countermeasure', detail:'F001 มีสิ่งของที่ไม่เกี่ยวข้องวางอยู่', foundDate:'2026-08-25', plannedDate:'2026-10-30'},
+      {area:'5-2โต๊ะประกอบงาน1', type:'Countermeasure', detail:'F001 มีสิ่งของที่ไม่เกี่ยวข้องวางอยู่',responsible:'Pum' foundDate:'2026-08-25', plannedDate:'2026-10-30'},
       {area:'6-1ตู้แอร์เคลื่อนที่', type:'Countermeasure', detail:'F002 ถังรองน้ำแอร์ชำรุด', foundDate:'2026-08-14', plannedDate:'2026-10-30'},
       {area:'7-1ที่เก็บรถเข็น', type:'Countermeasure', detail:'F003 กำลังหาที่เก็บรถเข็น', foundDate:'2026-08-24', plannedDate:'2026-11-30'},
       {area:'7-8.3ที่เก็บกล่องเครื่องมือ No.03', type:'Countermeasure', detail:'F004 อยู่ระหว่างปรับปรุงพื้นที่', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
