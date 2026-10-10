@@ -237,14 +237,14 @@
     // ตัวอย่างรูปแบบเท่านั้น: foundDate:'2026-10-10', plannedDate:'2026-10-20'
     // ยังไม่ทราบวันที่ให้เว้นเป็น '' ระบบจะแสดง — โดยไม่กำหนดวันที่ให้เอง
     const data = [
-      {area:'5-2โต๊ะประกอบงาน1', type:'Countermeasure', detail:'มีสิ่งของที่ไม่เกี่ยวข้องวางอยู่', foundDate:'2026-08-25', plannedDate:'2026-10-30'},
-      {area:'6-1ตู้แอร์เคลื่อนที่', type:'Countermeasure', detail:'F010 ถังรองน้ำแอร์ชำรุด', foundDate:'', plannedDate:''},
-      {area:'4-3ตู้เก็บอุปกรณ์ 5ส', type:'Fault', detail:'อุปกรณ์ไม่ครบ', foundDate:'', plannedDate:''},
-      {area:'4-7ตู้เก็บอุปกรณ์ Safety', type:'Fault', detail:'ตู้เก็บอุปกรณ์เก่า', foundDate:'', plannedDate:''},
-      {area:'6-3เครื่องปริ้น 3D', type:'Fault', detail:'พื้นที่ใหม่อุปกรณ์ไม่ตรงตามมาตรฐาน', foundDate:'', plannedDate:''},
-      {area:'7-2.4ที่จอดรถใส่อุปกรณ์ No.04', type:'Fault', detail:'ยังไม่มีป้ายบ่งชี้', foundDate:'', plannedDate:''},
-      {area:'ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.02', type:'Fault', detail:'ยังไม่มีรถเข็นใส่อุปกรณ์แบบลิ้นชัก อยู่ระหว่างรองบ', foundDate:'', plannedDate:''},
-      {area:'7-2.3ที่จอดรถใส่อุปกรณ์ No.03', type:'Fault', detail:'เอกสาร Part list ไม่ครบ', foundDate:'', plannedDate:''},
+      {area:'5-2โต๊ะประกอบงาน1', type:'Countermeasure', detail:'F001 มีสิ่งของที่ไม่เกี่ยวข้องวางอยู่', foundDate:'2026-08-25', plannedDate:'2026-10-30'},
+      {area:'6-1ตู้แอร์เคลื่อนที่', type:'Countermeasure', detail:'F002 ถังรองน้ำแอร์ชำรุด', foundDate:'2026-08-14', plannedDate:'2026-10-30'},
+      {area:'7-1ที่เก็บรถเข็น', type:'Countermeasure', detail:'F003 กำลังหาที่เก็บรถเข็น', foundDate:'2026-08-24', plannedDate:'2026-11-30'},
+      {area:'7-8.3ที่เก็บกล่องเครื่องมือ No.03', type:'Countermeasure', detail:'F004 อยู่ระหว่างปรับปรุงพื้นที่', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
+      {area:'7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลื้นชัก No.03', type:'Countermeasuret', detail:'F005 ยังไม่มีPart List', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
+      {area:'3-9.3ชั้นวางของ New Project Team N0.03', type:'Countermeasuret', detail:'F006 ชั้นวางไม่มีกล่องใส+PartList', foundDate:'2026-07-30', plannedDate:'2026-10-30'},
+      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasuret', detail:'F007 รอการสั่งซื้อและกำหนดMax-Min', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
+      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasuret', detail:'F008 อยู่ระหว่างปรับปรุง', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
       {area:'7-5ที่เก็บเครื่องปริ้นมาร์คสายไฟสว่านไฟฟ้า Rollสายไฟ-สายลม', type:'Fault', detail:'เอกสารไม่ครบ', foundDate:'', plannedDate:''},
       {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Fault', detail:'Min Stock Order', foundDate:'', plannedDate:''},
       {area:'4-5ตู้เก็บของใช้สิ้นเปลือง3-4', type:'Fault', detail:'Min Stock Order', foundDate:'', plannedDate:''},
