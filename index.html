@@ -7,7 +7,7 @@
   <!--
     ไฟล์เดียวจบ: HTML + CSS + JavaScript ไม่ต้องติดตั้งโปรแกรมหรือใช้ CDN
     ใช้แทน index.html ในโฟลเดอร์เดียวกับ KYT.html และ 3Pillars.html
-    1. แก้รายการสิ่งผิดปกติที่ const data ด้านล่าง
+    1. แก้รายการสิ่งผิดปกติและวันที่ที่ const data ด้านล่าง
     2. แก้ชื่อ / ตำแหน่งที่ฟังก์ชัน drawOffice, drawWorkshop, drawAssembly
     3. x, y, width, height เป็นพิกัดบนแผนผัง 3200 × 1120
     4. สีลูกศรเป็นกลุ่มอุปกรณ์ตามภาพ ไม่ใช่สีสถานะ Countermeasure / Kaizen
@@ -77,12 +77,16 @@
     .filters input, .filters select { padding: 8px 10px; border: 1px solid #bfcbd9; border-radius: 5px; color: var(--ink); background: white; font-size: 13px; }
     .filters input { width: 220px; max-width: 100%; }
     .table-scroll { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    table { width: 100%; min-width: 960px; table-layout: fixed; border-collapse: collapse; text-align: left; font-size: 13px; }
     th { padding: 10px 14px; background: #ecf1f8; font-size: 12px; color: #253e65; }
-    td { padding: 11px 14px; border-bottom: 1px solid #e7ebf0; line-height: 1.6; }
+    td { padding: 11px 14px; border-bottom: 1px solid #e7ebf0; line-height: 1.6; overflow-wrap: anywhere; }
     tr:last-child td { border-bottom: 0; }
-    th:nth-child(1) { width: 40%; }
-    th:nth-child(2) { width: 150px; }
+    th:nth-child(1) { width: 28%; }
+    th:nth-child(2) { width: 172px; }
+    th.date-column { width: 150px; text-align: center; }
+    th.planned-date-column { width: 190px; }
+    .date-cell { text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .date-missing { color: var(--muted); }
     .status-label { display: inline-flex; align-items: center; gap: 7px; font-weight: bold; white-space: nowrap; }
     .status-countermeasure { color: var(--countermeasure); }
     .status-kaizen { color: var(--kaizen); }
@@ -94,6 +98,9 @@
     #zoneName { font-size: 18px; margin: 14px 0 20px; line-height: 1.6; }
     .zone-report { padding: 14px; margin-top: 10px; background: #f4f6fa; border-radius: 6px; line-height: 1.7; }
     .zone-report p { margin: 8px 0 0; }
+    .report-dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
+    .report-dates dt { color: var(--muted); font-size: 12px; }
+    .report-dates dd { margin: 3px 0 0; font-size: 13px; font-variant-numeric: tabular-nums; }
     noscript { display: block; padding: 30px; color: #8e2029; }
     @media (max-width: 1050px) {
       .header { flex-wrap: wrap; gap: 12px; }
@@ -109,7 +116,7 @@
       main { padding: 10px; }
       .filters { width: 100%; }
       .filters input { width: 170px; }
-      table { min-width: 620px; }
+      .report-dates { grid-template-columns: 1fr; }
     }
     @media print {
       body { background: white; }
@@ -119,6 +126,13 @@
       #mapViewport { max-height: none; overflow: visible; }
       #layout { width: 100% !important; }
       .map-card { break-inside: avoid; }
+      table { min-width: 0; font-size: 10px; }
+      th, td { padding: 7px; }
+      th:nth-child(1) { width: 26%; }
+      th:nth-child(2) { width: 22%; }
+      th.date-column { width: 15%; }
+      .status-label { white-space: normal; }
+      .dot { flex-shrink: 0; }
       * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
     }
   </style>
@@ -186,7 +200,15 @@
       </div>
       <div class="table-scroll">
         <table id="alarmTable">
-          <thead><tr><th scope="col">พื้นที่</th><th scope="col">ประเภท</th><th scope="col">รายละเอียด</th></tr></thead>
+          <thead>
+            <tr>
+              <th scope="col">พื้นที่</th>
+              <th scope="col">ประเภท</th>
+              <th scope="col">รายละเอียด</th>
+              <th scope="col" class="date-column">วันที่พบปัญหา</th>
+              <th scope="col" class="date-column planned-date-column">วันที่วางแผนแก้ไขเสร็จ</th>
+            </tr>
+          </thead>
           <tbody id="alarmTableBody"></tbody>
         </table>
       </div>
@@ -210,20 +232,24 @@
     // areaCode เป็นตัวเลือก เช่น {areaCode:'7-7.2', area:'ชื่อพื้นที่', ...}
     // ถ้าไม่ใส่ areaCode ระบบจะอ่านรหัสที่อยู่ต้นข้อความ area
     // type ใช้ Countermeasure หรือ Kaizen; Fault เดิมจะแสดงและนับเป็น Countermeasure
+    // foundDate = วันที่พบปัญหา / plannedDate = วันที่วางแผนแก้ไขเสร็จ
+    // กรอกวันที่รูปแบบ YYYY-MM-DD (ปี ค.ศ.) แล้วหน้าจอจะแสดงเป็น DD/MM/YYYY
+    // ตัวอย่างรูปแบบเท่านั้น: foundDate:'2026-10-10', plannedDate:'2026-10-20'
+    // ยังไม่ทราบวันที่ให้เว้นเป็น '' ระบบจะแสดง — โดยไม่กำหนดวันที่ให้เอง
     const data = [
-      {area:'5-1รั้วยืด', type:'Countermeasure', detail:'รั้วงอ'},
-      {area:'6-1ตู้แอร์เคลื่อนที่', type:'Countermeasure', detail:'F010 ถังรองน้ำแอร์ชำรุด'},
-      {area:'4-3ตู้เก็บอุปกรณ์ 5ส', type:'Fault', detail:'อุปกรณ์ไม่ครบ'},
-      {area:'4-7ตู้เก็บอุปกรณ์ Safety', type:'Fault', detail:'ตู้เก็บอุปกรณ์เก่า'},
-      {area:'6-3เครื่องปริ้น 3D', type:'Fault', detail:'พื้นที่ใหม่อุปกรณ์ไม่ตรงตามมาตรฐาน'},
-      {area:'7-2.4ที่จอดรถใส่อุปกรณ์ No.04', type:'Fault', detail:'ยังไม่มีป้ายบ่งชี้'},
-      {area:'ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.02', type:'Fault', detail:'ยังไม่มีรถเข็นใส่อุปกรณ์แบบลิ้นชัก อยู่ระหว่างรองบ'},
-      {area:'7-2.3ที่จอดรถใส่อุปกรณ์ No.03', type:'Fault', detail:'เอกสาร Part list ไม่ครบ'},
-      {area:'7-5ที่เก็บเครื่องปริ้นมาร์คสายไฟสว่านไฟฟ้า Rollสายไฟ-สายลม', type:'Fault', detail:'เอกสารไม่ครบ'},
-      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Fault', detail:'Min Stock Order'},
-      {area:'4-5ตู้เก็บของใช้สิ้นเปลือง3-4', type:'Fault', detail:'Min Stock Order'},
-      {area:'6-4แอร์ติดผนัง', type:'Fault', detail:'ยังไม่มีเอกสารแพลนการล้างแอร์'},
-      {area:'7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.03', type:'Fault', detail:'พื้นที่ใหม่ไม่มีเอกสาร'}
+      {area:'5-1รั้วยืด', type:'Countermeasure', detail:'รั้วงอ', foundDate:'', plannedDate:''},
+      {area:'6-1ตู้แอร์เคลื่อนที่', type:'Countermeasure', detail:'F010 ถังรองน้ำแอร์ชำรุด', foundDate:'', plannedDate:''},
+      {area:'4-3ตู้เก็บอุปกรณ์ 5ส', type:'Fault', detail:'อุปกรณ์ไม่ครบ', foundDate:'', plannedDate:''},
+      {area:'4-7ตู้เก็บอุปกรณ์ Safety', type:'Fault', detail:'ตู้เก็บอุปกรณ์เก่า', foundDate:'', plannedDate:''},
+      {area:'6-3เครื่องปริ้น 3D', type:'Fault', detail:'พื้นที่ใหม่อุปกรณ์ไม่ตรงตามมาตรฐาน', foundDate:'', plannedDate:''},
+      {area:'7-2.4ที่จอดรถใส่อุปกรณ์ No.04', type:'Fault', detail:'ยังไม่มีป้ายบ่งชี้', foundDate:'', plannedDate:''},
+      {area:'ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.02', type:'Fault', detail:'ยังไม่มีรถเข็นใส่อุปกรณ์แบบลิ้นชัก อยู่ระหว่างรองบ', foundDate:'', plannedDate:''},
+      {area:'7-2.3ที่จอดรถใส่อุปกรณ์ No.03', type:'Fault', detail:'เอกสาร Part list ไม่ครบ', foundDate:'', plannedDate:''},
+      {area:'7-5ที่เก็บเครื่องปริ้นมาร์คสายไฟสว่านไฟฟ้า Rollสายไฟ-สายลม', type:'Fault', detail:'เอกสารไม่ครบ', foundDate:'', plannedDate:''},
+      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Fault', detail:'Min Stock Order', foundDate:'', plannedDate:''},
+      {area:'4-5ตู้เก็บของใช้สิ้นเปลือง3-4', type:'Fault', detail:'Min Stock Order', foundDate:'', plannedDate:''},
+      {area:'6-4แอร์ติดผนัง', type:'Fault', detail:'ยังไม่มีเอกสารแพลนการล้างแอร์', foundDate:'', plannedDate:''},
+      {area:'7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.03', type:'Fault', detail:'พื้นที่ใหม่ไม่มีเอกสาร', foundDate:'', plannedDate:''}
     ];
 
     // ==================== สี / เครื่องมือวาด ====================
@@ -508,6 +534,29 @@
       return span;
     }
 
+    // อ่านวันที่จากตัวเลขโดยตรง เพื่อไม่ให้วันเลื่อนตามเขตเวลาของเครื่อง
+    function reportDate(value) {
+      const iso = String(value || '').trim();
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+      if (match) {
+        const year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
+        const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+        const daysInMonth = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        if (year > 0 && month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth[month - 1]) {
+          const time = document.createElement('time');
+          time.dateTime = iso;
+          time.textContent = `${match[3]}/${match[2]}/${match[1]}`;
+          return time;
+        }
+      }
+      const missing = document.createElement('span');
+      missing.className = 'date-missing';
+      missing.textContent = '—';
+      missing.title = iso ? 'วันที่ไม่ถูกต้อง กรุณาใช้รูปแบบ YYYY-MM-DD' : 'ยังไม่ระบุวันที่';
+      missing.setAttribute('aria-label', missing.title);
+      return missing;
+    }
+
     function openZone(code, name, trigger) {
       lastZoneTrigger = trigger;
       document.getElementById('zoneCode').textContent = code;
@@ -527,6 +576,18 @@
         const p = document.createElement('p');
         p.textContent = item.detail || '—';
         div.appendChild(p);
+        const dates = document.createElement('dl');
+        dates.className = 'report-dates';
+        [['วันที่พบปัญหา', item.foundDate], ['วันที่วางแผนแก้ไขเสร็จ', item.plannedDate]].forEach(([title, value]) => {
+          const field = document.createElement('div');
+          const dt = document.createElement('dt');
+          const dd = document.createElement('dd');
+          dt.textContent = title;
+          dd.appendChild(reportDate(value));
+          field.append(dt, dd);
+          dates.appendChild(field);
+        });
+        div.appendChild(dates);
         reports.appendChild(div);
       });
       document.getElementById('zoneDialog').showModal();
@@ -547,14 +608,20 @@
         const area = document.createElement('td');
         const type = document.createElement('td');
         const detail = document.createElement('td');
+        const foundDate = document.createElement('td');
+        const plannedDate = document.createElement('td');
         area.textContent = item.area || '—';
         type.appendChild(statusLabel(item.type));
         detail.textContent = item.detail || '—';
-        tr.append(area, type, detail); tbody.appendChild(tr);
+        foundDate.className = 'date-cell';
+        plannedDate.className = 'date-cell';
+        foundDate.appendChild(reportDate(item.foundDate));
+        plannedDate.appendChild(reportDate(item.plannedDate));
+        tr.append(area, type, detail, foundDate, plannedDate); tbody.appendChild(tr);
       });
       if (!filtered.length) {
         const tr = document.createElement('tr'), td = document.createElement('td');
-        td.colSpan = 3; td.className = 'empty'; td.textContent = 'ไม่มีรายการที่ตรงกับเงื่อนไข';
+        td.colSpan = 5; td.className = 'empty'; td.textContent = 'ไม่มีรายการที่ตรงกับเงื่อนไข';
         tr.appendChild(td); tbody.appendChild(tr);
       }
     }
