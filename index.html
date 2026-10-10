@@ -7,7 +7,7 @@
   <!--
     ไฟล์เดียวจบ: HTML + CSS + JavaScript ไม่ต้องติดตั้งโปรแกรมหรือใช้ CDN
     ใช้แทน index.html ในโฟลเดอร์เดียวกับ KYT.html และ 3Pillars.html
-    1. แก้รายการสิ่งผิดปกติและวันที่ที่ const data ด้านล่าง
+    1. แก้รายการสิ่งผิดปกติ ผู้รับผิดชอบ และวันที่ที่ const data ด้านล่าง
     2. แก้ชื่อ / ตำแหน่งที่ฟังก์ชัน drawOffice, drawWorkshop, drawAssembly
     3. x, y, width, height เป็นพิกัดบนแผนผัง 3200 × 1120
     4. สีลูกศรเป็นกลุ่มอุปกรณ์ตามภาพ ไม่ใช่สีสถานะ Countermeasure / Kaizen
@@ -75,14 +75,15 @@
     .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
     .filters label { font-size: 12px; }
     .filters input, .filters select { padding: 8px 10px; border: 1px solid #bfcbd9; border-radius: 5px; color: var(--ink); background: white; font-size: 13px; }
-    .filters input { width: 220px; max-width: 100%; }
+    .filters input { width: 290px; max-width: 100%; }
     .table-scroll { overflow-x: auto; }
-    table { width: 100%; min-width: 960px; table-layout: fixed; border-collapse: collapse; text-align: left; font-size: 13px; }
+    table { width: 100%; min-width: 1200px; table-layout: fixed; border-collapse: collapse; text-align: left; font-size: 13px; }
     th { padding: 10px 14px; background: #ecf1f8; font-size: 12px; color: #253e65; }
     td { padding: 11px 14px; border-bottom: 1px solid #e7ebf0; line-height: 1.6; overflow-wrap: anywhere; }
     tr:last-child td { border-bottom: 0; }
-    th:nth-child(1) { width: 28%; }
+    th:nth-child(1) { width: 24%; }
     th:nth-child(2) { width: 172px; }
+    th.responsible-column { width: 180px; }
     th.date-column { width: 150px; text-align: center; }
     th.planned-date-column { width: 190px; }
     .date-cell { text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -98,6 +99,7 @@
     #zoneName { font-size: 18px; margin: 14px 0 20px; line-height: 1.6; }
     .zone-report { padding: 14px; margin-top: 10px; background: #f4f6fa; border-radius: 6px; line-height: 1.7; }
     .zone-report p { margin: 8px 0 0; }
+    .report-responsible { overflow-wrap: anywhere; }
     .report-dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
     .report-dates dt { color: var(--muted); font-size: 12px; }
     .report-dates dd { margin: 3px 0 0; font-size: 13px; font-variant-numeric: tabular-nums; }
@@ -128,9 +130,10 @@
       .map-card { break-inside: avoid; }
       table { min-width: 0; font-size: 10px; }
       th, td { padding: 7px; }
-      th:nth-child(1) { width: 26%; }
-      th:nth-child(2) { width: 22%; }
-      th.date-column { width: 15%; }
+      th:nth-child(1) { width: 22%; }
+      th:nth-child(2) { width: 18%; }
+      th.responsible-column { width: 16%; }
+      th.date-column { width: 14%; }
       .status-label { white-space: normal; }
       .dot { flex-shrink: 0; }
       * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
@@ -189,7 +192,7 @@
         <h2 id="alarmHeading">ALARM LIST · รายการสิ่งผิดปกติ</h2>
         <div class="filters">
           <label for="areaSearch">ค้นหา</label>
-          <input id="areaSearch" type="search" placeholder="รหัสพื้นที่ / รายละเอียด">
+          <input id="areaSearch" type="search" placeholder="พื้นที่ / รายละเอียด / ผู้รับผิดชอบ">
           <label for="typeFilter">ประเภท</label>
           <select id="typeFilter">
             <option value="all">ทั้งหมด</option>
@@ -205,6 +208,7 @@
               <th scope="col">พื้นที่</th>
               <th scope="col">ประเภท</th>
               <th scope="col">รายละเอียด</th>
+              <th scope="col" class="responsible-column">ผู้รับผิดชอบ</th>
               <th scope="col" class="date-column">วันที่พบปัญหา</th>
               <th scope="col" class="date-column planned-date-column">วันที่วางแผนแก้ไขเสร็จ</th>
             </tr>
@@ -232,24 +236,26 @@
     // areaCode เป็นตัวเลือก เช่น {areaCode:'7-7.2', area:'ชื่อพื้นที่', ...}
     // ถ้าไม่ใส่ areaCode ระบบจะอ่านรหัสที่อยู่ต้นข้อความ area
     // type ใช้ Countermeasure หรือ Kaizen; Fault เดิมจะแสดงและนับเป็น Countermeasure
+    // responsible = ชื่อผู้รับผิดชอบ เช่น responsible:'ชื่อ นามสกุล'
+    // ถ้ายังไม่กำหนดผู้รับผิดชอบให้เว้นเป็น '' ระบบจะแสดง —
     // foundDate = วันที่พบปัญหา / plannedDate = วันที่วางแผนแก้ไขเสร็จ
     // กรอกวันที่รูปแบบ YYYY-MM-DD (ปี ค.ศ.) แล้วหน้าจอจะแสดงเป็น DD/MM/YYYY
     // ตัวอย่างรูปแบบเท่านั้น: foundDate:'2026-10-10', plannedDate:'2026-10-20'
     // ยังไม่ทราบวันที่ให้เว้นเป็น '' ระบบจะแสดง — โดยไม่กำหนดวันที่ให้เอง
     const data = [
-      {area:'5-2โต๊ะประกอบงาน1', type:'Countermeasure', detail:'F001 มีสิ่งของที่ไม่เกี่ยวข้องวางอยู่', foundDate:'2026-08-25', plannedDate:'2026-10-30'},
-      {area:'6-1ตู้แอร์เคลื่อนที่', type:'Countermeasure', detail:'F002 ถังรองน้ำแอร์ชำรุด', foundDate:'2026-08-14', plannedDate:'2026-10-30'},
-      {area:'7-1ที่เก็บรถเข็น', type:'Countermeasure', detail:'F003 กำลังหาที่เก็บรถเข็น', foundDate:'2026-08-24', plannedDate:'2026-11-30'},
-      {area:'7-8.3ที่เก็บกล่องเครื่องมือ No.03', type:'Countermeasure', detail:'F004 อยู่ระหว่างปรับปรุงพื้นที่', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
-      {area:'7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลื้นชัก No.03', type:'Countermeasure', detail:'F005 ยังไม่มีPart List', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
-      {area:'3-9.3ชั้นวางของ New Project Team N0.03', type:'Countermeasure', detail:'F006 ชั้นวางไม่มีกล่องใส+PartList', foundDate:'2026-07-30', plannedDate:'2026-10-30'},
-      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasure', detail:'F007 รอการสั่งซื้อและกำหนดMax-Min', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
-      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasure', detail:'F008 อยู่ระหว่างปรับปรุง', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
-      {area:'7-5ที่เก็บเครื่องปริ้นมาร์คสายไฟสว่านไฟฟ้า Rollสายไฟ-สายลม', type:'Countermeasure', detail:'เอกสารไม่ครบ', foundDate:'', plannedDate:''},
-      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasure', detail:'Min Stock Order', foundDate:'', plannedDate:''},
-      {area:'4-5ตู้เก็บของใช้สิ้นเปลือง3-4', type:'Countermeasure', detail:'Min Stock Order', foundDate:'', plannedDate:''},
-      {area:'6-4แอร์ติดผนัง', type:'Countermeasure', detail:'ยังไม่มีเอกสารแพลนการล้างแอร์', foundDate:'', plannedDate:''},
-      {area:'7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.03', type:'Countermeasure', detail:'พื้นที่ใหม่ไม่มีเอกสาร', foundDate:'', plannedDate:''}
+      {area:'5-2โต๊ะประกอบงาน1', type:'Countermeasure', detail:'F001 มีสิ่งของที่ไม่เกี่ยวข้องวางอยู่', responsible:'', foundDate:'2026-08-25', plannedDate:'2026-10-30'},
+      {area:'6-1ตู้แอร์เคลื่อนที่', type:'Countermeasure', detail:'F002 ถังรองน้ำแอร์ชำรุด', responsible:'', foundDate:'2026-08-14', plannedDate:'2026-10-30'},
+      {area:'7-1ที่เก็บรถเข็น', type:'Countermeasure', detail:'F003 กำลังหาที่เก็บรถเข็น', responsible:'', foundDate:'2026-08-24', plannedDate:'2026-11-30'},
+      {area:'7-8.3ที่เก็บกล่องเครื่องมือ No.03', type:'Countermeasure', detail:'F004 อยู่ระหว่างปรับปรุงพื้นที่', responsible:'', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
+      {area:'7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลื้นชัก No.03', type:'Countermeasure', detail:'F005 ยังไม่มีPart List', responsible:'', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
+      {area:'3-9.3ชั้นวางของ New Project Team N0.03', type:'Countermeasure', detail:'F006 ชั้นวางไม่มีกล่องใส+PartList', responsible:'', foundDate:'2026-07-30', plannedDate:'2026-10-30'},
+      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasure', detail:'F007 รอการสั่งซื้อและกำหนดMax-Min', responsible:'', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
+      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasure', detail:'F008 อยู่ระหว่างปรับปรุง', responsible:'', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
+      {area:'7-5ที่เก็บเครื่องปริ้นมาร์คสายไฟสว่านไฟฟ้า Rollสายไฟ-สายลม', type:'Countermeasure', detail:'เอกสารไม่ครบ', responsible:'', foundDate:'', plannedDate:''},
+      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasure', detail:'Min Stock Order', responsible:'', foundDate:'', plannedDate:''},
+      {area:'4-5ตู้เก็บของใช้สิ้นเปลือง3-4', type:'Countermeasure', detail:'Min Stock Order', responsible:'', foundDate:'', plannedDate:''},
+      {area:'6-4แอร์ติดผนัง', type:'Countermeasure', detail:'ยังไม่มีเอกสารแพลนการล้างแอร์', responsible:'', foundDate:'', plannedDate:''},
+      {area:'7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.03', type:'Countermeasure', detail:'พื้นที่ใหม่ไม่มีเอกสาร', responsible:'', foundDate:'', plannedDate:''}
     ];
 
     // ==================== สี / เครื่องมือวาด ====================
@@ -576,6 +582,12 @@
         const p = document.createElement('p');
         p.textContent = item.detail || '—';
         div.appendChild(p);
+        const responsible = document.createElement('p');
+        responsible.className = 'report-responsible';
+        const responsibleLabel = document.createElement('strong');
+        responsibleLabel.textContent = 'ผู้รับผิดชอบ: ';
+        responsible.append(responsibleLabel, document.createTextNode(String(item.responsible || '').trim() || '—'));
+        div.appendChild(responsible);
         const dates = document.createElement('dl');
         dates.className = 'report-dates';
         [['วันที่พบปัญหา', item.foundDate], ['วันที่วางแผนแก้ไขเสร็จ', item.plannedDate]].forEach(([title, value]) => {
@@ -601,27 +613,30 @@
       tbody.replaceChildren();
       const filtered = data.filter(item =>
         (selectedType === 'all' || normalizeType(item.type) === selectedType) &&
-        `${item.areaCode || ''} ${item.area || ''} ${item.detail || ''}`.toLocaleLowerCase().includes(query)
+        `${item.areaCode || ''} ${item.area || ''} ${item.detail || ''} ${item.responsible || ''}`.toLocaleLowerCase().includes(query)
       );
       filtered.forEach(item => {
         const tr = document.createElement('tr');
         const area = document.createElement('td');
         const type = document.createElement('td');
         const detail = document.createElement('td');
+        const responsible = document.createElement('td');
         const foundDate = document.createElement('td');
         const plannedDate = document.createElement('td');
         area.textContent = item.area || '—';
         type.appendChild(statusLabel(item.type));
         detail.textContent = item.detail || '—';
+        responsible.className = 'responsible-cell';
+        responsible.textContent = String(item.responsible || '').trim() || '—';
         foundDate.className = 'date-cell';
         plannedDate.className = 'date-cell';
         foundDate.appendChild(reportDate(item.foundDate));
         plannedDate.appendChild(reportDate(item.plannedDate));
-        tr.append(area, type, detail, foundDate, plannedDate); tbody.appendChild(tr);
+        tr.append(area, type, detail, responsible, foundDate, plannedDate); tbody.appendChild(tr);
       });
       if (!filtered.length) {
         const tr = document.createElement('tr'), td = document.createElement('td');
-        td.colSpan = 5; td.className = 'empty'; td.textContent = 'ไม่มีรายการที่ตรงกับเงื่อนไข';
+        td.colSpan = 6; td.className = 'empty'; td.textContent = 'ไม่มีรายการที่ตรงกับเงื่อนไข';
         tr.appendChild(td); tbody.appendChild(tr);
       }
     }
