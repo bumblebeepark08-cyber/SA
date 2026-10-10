@@ -243,20 +243,19 @@
     // ตัวอย่างรูปแบบเท่านั้น: foundDate:'2026-10-10', plannedDate:'2026-10-20'
     // ยังไม่ทราบวันที่ให้เว้นเป็น '' ระบบจะแสดง — โดยไม่กำหนดวันที่ให้เอง
     const data = [
-      {area:'5-2โต๊ะประกอบงาน1', type:'Countermeasure', detail:'F001 มีสิ่งของที่ไม่เกี่ยวข้องวางอยู่', responsible:'ภัทราพร ร.', foundDate:'2026-08-25', plannedDate:'2026-10-30'},
-      {area:'6-1ตู้แอร์เคลื่อนที่', type:'Countermeasure', detail:'F002 ถังรองน้ำแอร์ชำรุด', responsible:'ธีระพันธ์ พ.', foundDate:'2026-08-14', plannedDate:'2026-10-30'},
-      {area:'7-1ที่เก็บรถเข็น', type:'Countermeasure', detail:'F003 กำลังหาที่เก็บรถเข็น', responsible:'ฐาปนี อ.', foundDate:'2026-08-24', plannedDate:'2026-11-30'},
-      {area:'7-8.3ที่เก็บกล่องเครื่องมือ No.03', type:'Countermeasure', detail:'F004 อยู่ระหว่างปรับปรุงพื้นที่', responsible:'สมบูรณ์ ส.', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
-      {area:'7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลื้นชัก No.03', type:'Countermeasure', detail:'F005 ยังไม่มีPart List', responsible:'สมบูรณ์ ส.', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
-      {area:'3-9.3ชั้นวางของ New Project Team N0.03', type:'Countermeasure', detail:'F006 ชั้นวางไม่มีกล่องใส+PartList', responsible:'สมบูรณ์ ส.', foundDate:'2026-07-30', plannedDate:'2026-10-30'},
-      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasure', detail:'F007 รอการสั่งซื้อและกำหนดMax-Min', responsible:'พรจันทร์ จ.', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
-      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasure', detail:'F008 อยู่ระหว่างปรับปรุง', responsible:'พรจันทร์ จ.', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
-      {area:'6-5TV1 TV2', type:'Countermeasure', detail:'F009 ไม่มีกล่องใส่Tagและพื้นที่วางกล่อง', responsible:'นิรันดร์ ค.', foundDate:'2026-10-1', plannedDate:'2026-10-31'},
-      {area:'7-3แผงเก็บเครื่องมือส่วนกลาง', type:'Countermeasure', detail:'F010 ดอกไขควงไฟฟ้าไม่ครบ', responsible:'สมบูรณ์ ส.', foundDate:'2026-09-25', plannedDate:'2026-10-31'},
-      {area:'4-4ตู้เก็บของใช้สิ้นเปลือง1-2', type:'Countermeasure', detail:'F010 ไม่มีหน้าจอในการเบิก-จ่ายของใช้สิ้นเปลือง', responsible:'วิรุฬห์ ช.', foundDate:'2026-08-12', plannedDate:'2026-10-30'},
-      {area:'6-3เครื่องปริ้น 3D', type:'Countermeasure', detail:'F011 พื้นที่ใหม่อุปกรณ์ไม่สมบูรณ์', responsible:'ทรงชัย ม.', foundDate:'2026-08-01', plannedDate:'2026-10-15'},
-      {area:'7-2.4ที่จอดรถใส่อุปกรณ์ No.04', type:'Countermeasure', detail:'F013 รถใส่อุปกณ์ยังไม่สมบูรณ์', responsible:'ทรงชัย ม.', foundDate:'2026-08-01', plannedDate:'2026-10-31'}
-      {area:'7-2.4ที่จอดรถใส่อุปกรณ์ No.04', type:'Countermeasure', detail:'F013 รถใส่อุปกณ์ยังไม่สมบูรณ์', responsible:'ทรงชัย ม.', foundDate:'2026-08-01', plannedDate:'2026-10-31'}
+      {area:'5-2โต๊ะประกอบงาน1', type:'Countermeasure', detail:'F001 มีสิ่งของที่ไม่เกี่ยวข้องวางอยู่', responsible:'', foundDate:'2026-08-25', plannedDate:'2026-10-30'},
+      {area:'6-1ตู้แอร์เคลื่อนที่', type:'Countermeasure', detail:'F002 ถังรองน้ำแอร์ชำรุด', responsible:'', foundDate:'2026-08-14', plannedDate:'2026-10-30'},
+      {area:'7-1ที่เก็บรถเข็น', type:'Countermeasure', detail:'F003 กำลังหาที่เก็บรถเข็น', responsible:'', foundDate:'2026-08-24', plannedDate:'2026-11-30'},
+      {area:'7-8.3ที่เก็บกล่องเครื่องมือ No.03', type:'Countermeasure', detail:'F004 อยู่ระหว่างปรับปรุงพื้นที่', responsible:'', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
+      {area:'7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลื้นชัก No.03', type:'Countermeasure', detail:'F005 ยังไม่มีPart List', responsible:'', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
+      {area:'3-9.3ชั้นวางของ New Project Team N0.03', type:'Countermeasure', detail:'F006 ชั้นวางไม่มีกล่องใส+PartList', responsible:'', foundDate:'2026-07-30', plannedDate:'2026-10-30'},
+      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasure', detail:'F007 รอการสั่งซื้อและกำหนดMax-Min', responsible:'', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
+      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasure', detail:'F008 อยู่ระหว่างปรับปรุง', responsible:'', foundDate:'2026-08-15', plannedDate:'2026-10-30'},
+      {area:'7-5ที่เก็บเครื่องปริ้นมาร์คสายไฟสว่านไฟฟ้า Rollสายไฟ-สายลม', type:'Countermeasure', detail:'เอกสารไม่ครบ', responsible:'', foundDate:'', plannedDate:''},
+      {area:'4-6ตู้เก็บของใช้สิ้นเปลือง5', type:'Countermeasure', detail:'Min Stock Order', responsible:'', foundDate:'', plannedDate:''},
+      {area:'4-5ตู้เก็บของใช้สิ้นเปลือง3-4', type:'Countermeasure', detail:'Min Stock Order', responsible:'', foundDate:'', plannedDate:''},
+      {area:'6-4แอร์ติดผนัง', type:'Countermeasure', detail:'ยังไม่มีเอกสารแพลนการล้างแอร์', responsible:'', foundDate:'', plannedDate:''},
+      {area:'7-7.3ที่จอดรถเข็นใส่อุปกรณ์แบบลิ้นชัก No.03', type:'Countermeasure', detail:'พื้นที่ใหม่ไม่มีเอกสาร', responsible:'', foundDate:'', plannedDate:''}
     ];
 
     // ==================== สี / เครื่องมือวาด ====================
