@@ -11,6 +11,7 @@
     2. แก้ชื่อ / ตำแหน่งที่ฟังก์ชัน drawOffice, drawWorkshop, drawAssembly
     3. x, y, width, height เป็นพิกัดบนแผนผัง 3200 × 1120
     4. สีลูกศรเป็นกลุ่มอุปกรณ์ตามภาพ ไม่ใช่สีสถานะ Countermeasure / Kaizen
+       จุดวงกลมแสดงประเภทงานจาก data: สีแดง Countermeasure / สีเขียว Kaizen
     5. ข้อมูลใน data เป็นข้อมูลจาก HTML ต้นฉบับ ไม่ได้เชื่อมข้อมูลออนไลน์อัตโนมัติ
     หมายเหตุจากภาพอ้างอิง:
     - รหัส 6-2 ใช้ทั้งบอร์ด STW และ Training Unit ตามภาพ
@@ -100,6 +101,7 @@
     .zone-report { padding: 14px; margin-top: 10px; background: #f4f6fa; border-radius: 6px; line-height: 1.7; }
     .zone-report p { margin: 8px 0 0; }
     .report-responsible { overflow-wrap: anywhere; }
+    .report-area-reference { font-size: 12px; color: var(--muted); }
     .report-dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
     .report-dates dt { color: var(--muted); font-size: 12px; }
     .report-dates dd { margin: 3px 0 0; font-size: 13px; font-variant-numeric: tabular-nums; }
@@ -179,7 +181,7 @@
       </div>
       <noscript>กรุณาเปิด JavaScript ในเบราว์เซอร์เพื่อแสดงแผนผังและรายการสิ่งผิดปกติ</noscript>
       <div class="map-hint">
-        <span>กดลูกศรรหัสพื้นที่เพื่อดูรายละเอียด · ใช้ปุ่มเลือกพื้นที่หรือ + เพื่อขยาย</span>
+        <span>กดลูกศรหรือจุดสีเพื่อดูรายละเอียด · ใช้ปุ่มเลือกพื้นที่หรือ + เพื่อขยาย</span>
         <div class="legend">
           <span><i class="dot dot-countermeasure"></i>Countermeasure</span>
           <span><i class="dot dot-kaizen"></i>Kaizen</span>
@@ -233,6 +235,8 @@
 
     // ==================== ข้อมูลสิ่งผิดปกติ ====================
     // เพิ่ม/แก้รายการตรงนี้ ถ้าไม่มีรายการให้ใช้ const data = [];
+    // ลงท้ายแต่ละรายการด้วย }, และเพิ่มรายการใหม่ก่อน ]; ได้มากกว่า 13 รายการ
+    // ดอทบนแผนผังแสดงตาม type ของแต่ละพื้นที่โดยอัตโนมัติเมื่อโหลดข้อมูล
     // areaCode เป็นตัวเลือก เช่น {areaCode:'7-7.2', area:'ชื่อพื้นที่', ...}
     // ถ้าไม่ใส่ areaCode ระบบจะอ่านรหัสที่อยู่ต้นข้อความ area
     // type ใช้ Countermeasure หรือ Kaizen; Fault เดิมจะแสดงและนับเป็น Countermeasure
@@ -275,6 +279,12 @@
       blue: '#62c9e9', purple: '#cf7ad2', yellow: '#fff21b', gray: '#b0b2b4',
       orange: '#f6b48b', red: '#e85427', white: '#ffffff', green: '#9bd04e'
     };
+    const STATUS_COLORS = {Countermeasure: '#d92532', Kaizen: '#00a861'};
+    // จับคู่จากชื่อ Project Team และหมายเลข No.03 / No.04 ในข้อมูลล่าสุด
+    // ฝั่งซ้ายคือรหัสในรายการ ฝั่งขวาคือรหัสป้ายที่มีอยู่บนแผนผัง
+    // หากเป็นคนละตำแหน่ง ให้แก้การจับคู่นี้ตามแผนผังจริง
+    const MAP_CODE_ALIASES = {'3-9.3': '4-8.3', '3-9.4': '4-8.4'};
+    const mapZones = [];
     let tagNumber = 0;
     let lastZoneTrigger = null;
 
@@ -342,14 +352,8 @@
       }
       node('polygon', {points, fill: COLORS[color] || color, stroke: '#28343a', 'stroke-width': 2, class: 'tag-shape'}, group);
       label(tx, ty, code, code.length > 4 ? 17 : 20, group);
-      // ดอทสีแดงเหนือป้าย 6-1 ตามตำแหน่งที่กำหนด
-      if (code === '6-1') {
-        node('circle', {
-          cx: 0, cy: -h - 15, r: 14,
-          fill: '#ff0000', stroke: '#ffffff', 'stroke-width': 3,
-          class: 'zone-red-dot', 'aria-hidden': 'true'
-        }, group);
-      }
+      // เก็บตำแหน่งป้าย เพื่อวาดดอทใหม่ตามข้อมูลใน loadDashboard()
+      mapZones.push({code, name, group, title, w, h, direction, y});
       group.addEventListener('click', () => openZone(code, name, group));
       group.addEventListener('keydown', event => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -396,11 +400,11 @@
       box(270, 325, 190, 40, 'Air ติดผนัง', {size: 18});
       tag('6-4', 'แอร์ติดผนัง', 365, 412, 'purple', 'up');
       box(460, 325, 110, 40, 'TV2', {size: 20});
-      tag('6-5', 'TV2', 515, 412, 'purple', 'up');
+      tag('6-5', 'TV2', 515, 433, 'purple', 'up');
       box(575, 390, 110, 47, 'เครื่องปริ้น 3D', {size: 14});
-      tag('6-3', 'เครื่องปริ้น 3D', 630, 345, 'purple', 'down');
+      tag('6-3', 'เครื่องปริ้น 3D', 630, 321, 'purple', 'down');
       box(603, 461, 82, 39, 'TV1', {size: 20});
-      tag('6-5', 'TV1', 644, 540, 'purple', 'up');
+      tag('6-5', 'TV1', 626, 569, 'purple', 'up');
       box(22, 567, 26, 214, 'ประตู', {size: 17, rotate: -90});
       box(49, 567, 28, 109, 'กระจก', {size: 17, rotate: -90});
       box(49, 676, 28, 105, 'ผ้าม่าน', {size: 17, rotate: -90});
@@ -431,26 +435,26 @@
     function drawWorkshop() {
       box(707, 325, 96, 79, ['ตู้เก็บของใช้', 'สิ้นเปลือง', '3–4'], {size: 15});
       box(707, 404, 96, 79, ['ตู้เก็บของใช้', 'สิ้นเปลือง', '1–2'], {size: 15});
-      tag('4-5', 'ตู้เก็บของใช้สิ้นเปลือง 3–4', 857, 386, 'yellow', 'left', 70, 28);
-      tag('4-4', 'ตู้เก็บของใช้สิ้นเปลือง 1–2', 857, 449, 'yellow', 'left', 70, 28);
+      tag('4-5', 'ตู้เก็บของใช้สิ้นเปลือง 3–4', 886, 386, 'yellow', 'left', 70, 28);
+      tag('4-4', 'ตู้เก็บของใช้สิ้นเปลือง 1–2', 886, 449, 'yellow', 'left', 70, 28);
       box(803, 325, 207, 55, 'แผงเก็บเครื่องมือ', {size: 16});
-      tag('7-3', 'แผงเก็บเครื่องมือ', 935, 421, 'gray', 'up');
+      tag('7-3', 'แผงเก็บเครื่องมือ', 970, 448, 'gray', 'up');
       box(1010, 325, 237, 55, 'ที่เก็บเครื่องมือวัด', {size: 16});
-      tag('7-4', 'ที่เก็บเครื่องมือวัด', 1128, 421, 'gray', 'up');
+      tag('7-4', 'ที่เก็บเครื่องมือวัด', 1128, 448, 'gray', 'up');
       box(1247, 325, 238, 55, 'ชั้นเก็บอุปกรณ์สิ้นเปลือง 3', {size: 14});
-      tag('4-6', 'ชั้นเก็บอุปกรณ์สิ้นเปลือง 3', 1366, 421, 'yellow', 'up');
+      tag('4-6', 'ชั้นเก็บอุปกรณ์สิ้นเปลือง 3', 1366, 448, 'yellow', 'up');
       box(1485, 325, 340, 55, ['ที่เก็บเครื่องปริ้นมาร์คสายไฟ / สว่านไฟฟ้า', 'Roll สายไฟ–สายลม'], {size: 14});
-      tag('7-5', 'ที่เก็บเครื่องปริ้นมาร์คสายไฟ สว่านไฟฟ้า Roll สายไฟ–สายลม', 1655, 421, 'gray', 'up');
+      tag('7-5', 'ที่เก็บเครื่องปริ้นมาร์คสายไฟ สว่านไฟฟ้า Roll สายไฟ–สายลม', 1655, 448, 'gray', 'up');
       box(1825, 325, 140, 55, 'บอร์ด STW', {size: 17});
-      tag('6-2', 'บอร์ด STW', 1895, 421, 'blue', 'up');
+      tag('6-2', 'บอร์ด STW', 1895, 448, 'blue', 'up');
       box(1965, 325, 225, 43, 'บอร์ด Post Document', {size: 16});
-      tag('8-1', 'บอร์ด Post Document', 2076, 414, 'orange', 'up');
+      tag('8-1', 'บอร์ด Post Document', 2076, 436, 'orange', 'up');
       box(719, 830, 131, 75, ['ล็อกเกอร์ของใช้', 'ส่วนตัว'], {size: 15});
       tag('9-1', 'ล็อกเกอร์ของใช้ส่วนตัว', 784, 782, 'red', 'down');
       box(850, 864, 145, 41, 'ตู้เก็บอุปกรณ์ 5ส', {size: 14});
-      tag('4-3', 'ตู้เก็บอุปกรณ์ 5ส', 922, 816, 'yellow', 'down');
+      tag('4-3', 'ตู้เก็บอุปกรณ์ 5ส', 922, 795, 'yellow', 'down');
       box(995, 833, 145, 72, ['ตู้เก็บอุปกรณ์', 'Safety'], {size: 16});
-      tag('4-7', 'ตู้เก็บอุปกรณ์ Safety', 1067, 785, 'yellow', 'down');
+      tag('4-7', 'ตู้เก็บอุปกรณ์ Safety', 1067, 765, 'yellow', 'down');
       box(1140, 848, 140, 57, ['ที่เก็บอุปกรณ์', 'สำนักงาน'], {size: 14});
       tag('4-2', 'ที่เก็บอุปกรณ์สำนักงาน', 1210, 799, 'yellow', 'down');
       box(1280, 880, 255, 25, 'ที่แขวนหมวก Safety และหมวกผ้า', {size: 13});
@@ -484,7 +488,7 @@
       ];
       topItems.forEach(item => {
         box(item.x, 37, item.w, 74, item.name, {fill: item.fill, size: 14});
-        tag(item.code, item.name.join(' '), item.x + item.w / 2, 162, item.color, 'up', item.w - 25, 40);
+        tag(item.code, item.name.join(' '), item.x + item.w / 2, 180, item.color, 'up', item.w - 25, 40);
       });
 
       // หนึ่งแถว = รถเข็น + รถเข็นลิ้นชัก + กล่องเครื่องมือ + Project Team
@@ -500,9 +504,9 @@
         box(3030, y, 40, 103, '', {fill: COLORS.green});
         box(3070, y, 90, 103, '', {fill: '#ffc417'});
         label(3115, y + 57, ['ชิ้นงานใหม่', 'Project Team', `No.${no}`], 12.5);
-        tag(`7-2.${i}`, cart, 2805, y + 17, 'gray', 'right', 106, 28);
-        tag(`7-7.${i}`, drawer, 2805, y + 54, 'gray', 'right', 106, 28);
-        tag(`7-8.${i}`, toolbox, 2805, y + 88, 'gray', 'right', 106, 25);
+        tag(`7-2.${i}`, cart, 2790, y + 17, 'gray', 'right', 78, 28);
+        tag(`7-7.${i}`, drawer, 2790, y + 54, 'gray', 'right', 78, 28);
+        tag(`7-8.${i}`, toolbox, 2790, y + 88, 'gray', 'right', 78, 25);
         tag(`4-8.${i}`, `ชิ้นงาน New Project Team No.${no}`, 3115, y + 13, 'yellow', 'label', 85, 25);
         if (i < 6) rect(2868, y + 100, 297, 5, '#fff', equipment, {'stroke-width': 1});
       }
@@ -510,7 +514,7 @@
       box(2550, 752, 96, 142, ['โต๊ะ', 'ประกอบ', 'งาน 2'], {size: 19});
       tag('5-15', 'โต๊ะประกอบงาน 2', 2598, 706, 'blue', 'down', 82, 52);
       box(2646, 790, 98, 104, ['โต๊ะ', 'ประกอบ', 'งาน 1'], {size: 19});
-      tag('5-2', 'โต๊ะประกอบงาน 1', 2695, 746, 'blue', 'down', 82, 52);
+      tag('5-2', 'โต๊ะประกอบงาน 1', 2695, 715, 'blue', 'down', 82, 52);
       box(3005, 857, 155, 39, 'Power plug', {fill: '#ff4d49', size: 17});
       tag('5-12', 'Power plug', 3082, 953, 'blue', 'up', 90, 43);
       box(2638, 934, 150, 44, 'รั้วยืด', {size: 20});
@@ -522,6 +526,55 @@
       if (item.areaCode) return String(item.areaCode).trim();
       const match = String(item.area || '').trim().match(/^(\d+-\d+(?:\.\d+)?)/);
       return match ? match[1] : '';
+    }
+
+    // ดอทและหน้าต่างรายละเอียดใช้การจับคู่พื้นที่แบบเดียวกัน
+    function reportsForZone(code, name) {
+      return data.filter(item => {
+        const reportCode = areaCode(item);
+        return (MAP_CODE_ALIASES[reportCode] || reportCode) === code ||
+          (!reportCode && item.area === name);
+      });
+    }
+
+    // วางดอทด้านหน้าปลายหัวลูกศรตามทิศที่ชี้ โดยเว้นช่องว่าง 5 หน่วย
+    function markerPosition(zone, index, total) {
+      const {w, h, direction} = zone;
+      const offset = 10 + 14 + 5; // ปลายลูกศร + รัศมีดอท + ช่องว่าง
+      const cross = (index - (total - 1) / 2) * 32;
+      if (direction === 'up') return {cx: cross, cy: -h - offset};
+      if (direction === 'down') return {cx: cross, cy: h + offset};
+      if (direction === 'left') return {cx: -w - offset, cy: cross};
+      if (direction === 'right') return {cx: w + offset, cy: cross};
+      if (direction === 'label') {
+        // ป้าย Project Team เป็นสี่เหลี่ยมไม่มีหัวลูกศร จึงวางจุดข้างป้าย
+        return {cx: -w - 20, cy: 38 + cross};
+      }
+      return {cx: cross, cy: -h - offset};
+    }
+
+    function renderMapStatuses() {
+      mapZones.forEach(zone => {
+        zone.group.querySelector('.zone-status-markers')?.remove();
+        const reports = reportsForZone(zone.code, zone.name);
+        const statuses = Object.keys(STATUS_COLORS).map(type => ({
+          type, count: reports.filter(item => normalizeType(item.type) === type).length
+        })).filter(status => status.count > 0);
+        const summary = statuses.map(status => `${status.type} ${status.count} รายการ`).join(' · ');
+        zone.title.textContent = `${zone.code} · ${zone.name}${summary ? ' · ' + summary : ''}`;
+        zone.group.setAttribute('aria-label', `พื้นที่ ${zone.code} ${zone.name}${summary ? ' · ' + summary : ''}`);
+        if (!statuses.length) return;
+        const markers = node('g', {class: 'zone-status-markers', 'aria-hidden': 'true'}, zone.group);
+        statuses.forEach((status, index) => {
+          const dot = node('circle', {
+            ...markerPosition(zone, index, statuses.length), r: 14,
+            fill: STATUS_COLORS[status.type], stroke: '#ffffff', 'stroke-width': 3,
+            class: `zone-status-dot ${status.type === 'Countermeasure' ? 'zone-red-dot' : 'zone-green-dot'}`,
+            'data-type': status.type, 'data-count': status.count
+          }, markers);
+          node('title', {}, dot).textContent = `${status.type}: ${status.count} รายการ · กดเพื่อดูรายละเอียด`;
+        });
+      });
     }
 
     // รองรับชื่อ Fault ในข้อมูลเก่า เพื่อให้ตัวนับ ตาราง และตัวกรองใช้ชื่อเดียวกัน
@@ -577,7 +630,7 @@
       document.getElementById('zoneName').textContent = name;
       const reports = document.getElementById('zoneReports');
       reports.replaceChildren();
-      const found = data.filter(item => areaCode(item) === code || (!areaCode(item) && item.area === name));
+      const found = reportsForZone(code, name);
       if (!found.length) {
         const p = document.createElement('p');
         p.textContent = 'ไม่มีรายการสิ่งผิดปกติของรหัสนี้ในข้อมูลที่แสดงอยู่';
@@ -587,6 +640,12 @@
         const div = document.createElement('div');
         div.className = 'zone-report';
         div.appendChild(statusLabel(item.type));
+        if (areaCode(item) && areaCode(item) !== code) {
+          const reference = document.createElement('p');
+          reference.className = 'report-area-reference';
+          reference.textContent = `พื้นที่ในรายการ: ${item.area} · ป้ายบนแผนผัง: ${code}`;
+          div.appendChild(reference);
+        }
         const p = document.createElement('p');
         p.textContent = item.detail || '—';
         div.appendChild(p);
@@ -658,6 +717,7 @@
       if (kaizen) {
         kaizen.textContent = data.filter(item => normalizeType(item.type) === 'Kaizen').length;
       }
+      renderMapStatuses();
       renderTable();
     }
 
@@ -678,7 +738,7 @@
 
     // ==================== ขยาย / เลือกดูเฉพาะพื้นที่ ====================
     const viewBoxes = {
-      all: '0 0 3200 1120', office: '0 300 720 820',
+      all: '0 0 3200 1120', office: '0 285 720 835',
       workshop: '695 300 1640 820', assembly: '2465 0 735 1090'
     };
     let zoom = 1, selectedView = 'all';
