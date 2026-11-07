@@ -84,7 +84,13 @@
     tr:last-child td { border-bottom: 0; }
     th:nth-child(1) { width: 24%; }
     th:nth-child(2) { width: 172px; }
+    th.status-column { width: 150px; text-align: center; }
     th.responsible-column { width: 180px; }
+    .status-cell { text-align: center; }
+    .status-select { width: 100%; min-width: 115px; padding: 7px 8px; border: 1px solid #c7d1df; border-radius: 6px; background: #fff; font-size: 12px; font-weight: bold; }
+    .status-select.status-closed { color: #087443; border-color: #8ac9a8; background: #effaf3; }
+    .status-select.status-on-plan { color: #0759a6; border-color: #91bce8; background: #eff6ff; }
+    .status-select.status-delay { color: #b4232d; border-color: #e7a0a5; background: #fff1f2; }
     th.date-column { width: 150px; text-align: center; }
     th.planned-date-column { width: 190px; }
     .date-cell { text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -210,6 +216,7 @@
               <th scope="col">พื้นที่</th>
               <th scope="col">ประเภท</th>
               <th scope="col">รายละเอียด</th>
+              <th scope="col" class="status-column">Status</th>
               <th scope="col" class="responsible-column">ผู้รับผิดชอบ</th>
               <th scope="col" class="date-column">วันที่พบปัญหา</th>
               <th scope="col" class="date-column planned-date-column">วันที่วางแผนแก้ไขเสร็จ</th>
@@ -695,6 +702,57 @@
     }
 
     // ==================== ตารางและตัวนับ ====================
+    // เก็บ Status ที่เลือกไว้ในเบราว์เซอร์เครื่องนี้ แม้ปิดแล้วเปิดหน้าใหม่ก็ยังอยู่
+    const STATUS_STORAGE_KEY = '5s-dashboard-item-status-v1';
+    function statusStorageKey(item) {
+      return [item.area || '', item.type || '', item.detail || '', item.responsible || ''].join('|');
+    }
+    function readSavedStatuses() {
+      try { return JSON.parse(localStorage.getItem(STATUS_STORAGE_KEY) || '{}'); }
+      catch (_) { return {}; }
+    }
+    function saveItemStatus(item, value) {
+      const saved = readSavedStatuses();
+      saved[statusStorageKey(item)] = value;
+      try { localStorage.setItem(STATUS_STORAGE_KEY, JSON.stringify(saved)); }
+      catch (_) { /* หากเบราว์เซอร์ปิดการจัดเก็บ ยังเลือกสถานะในหน้าปัจจุบันได้ */ }
+    }
+    function statusSelect(item) {
+      const saved = readSavedStatuses();
+      const key = statusStorageKey(item);
+      const selected = item.status || saved[key] || '';
+      const td = document.createElement('td');
+      td.className = 'status-cell';
+      const select = document.createElement('select');
+      select.className = 'status-select';
+      select.setAttribute('aria-label', `Status: ${item.area || item.detail || ''}`);
+      [
+        ['', 'เลือก Status'],
+        ['Closed', 'Closed'],
+        ['On Plan', 'On Plan'],
+        ['Delay', 'Delay']
+      ].forEach(([value, label]) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        select.appendChild(option);
+      });
+      select.value = selected;
+      const applyClass = () => {
+        select.classList.remove('status-closed', 'status-on-plan', 'status-delay');
+        if (select.value === 'Closed') select.classList.add('status-closed');
+        if (select.value === 'On Plan') select.classList.add('status-on-plan');
+        if (select.value === 'Delay') select.classList.add('status-delay');
+      };
+      applyClass();
+      select.addEventListener('change', () => {
+        saveItemStatus(item, select.value);
+        applyClass();
+      });
+      td.appendChild(select);
+      return td;
+    }
+
     function renderTable() {
       const query = document.getElementById('areaSearch').value.trim().toLocaleLowerCase();
       const selectedType = document.getElementById('typeFilter').value;
@@ -721,16 +779,17 @@
         plannedDate.className = 'date-cell';
         foundDate.appendChild(reportDate(item.foundDate));
         plannedDate.appendChild(reportDate(item.plannedDate));
-        tr.append(area, type, detail, responsible, foundDate, plannedDate); tbody.appendChild(tr);
+        tr.append(area, type, detail, statusSelect(item), responsible, foundDate, plannedDate);
+        tbody.appendChild(tr);
       });
       if (!filtered.length) {
         const tr = document.createElement('tr'), td = document.createElement('td');
-        td.colSpan = 6; td.className = 'empty'; td.textContent = 'ไม่มีรายการที่ตรงกับเงื่อนไข';
+        td.colSpan = 7; td.className = 'empty'; td.textContent = 'ไม่มีรายการที่ตรงกับเงื่อนไข';
         tr.appendChild(td); tbody.appendChild(tr);
       }
     }
 
-    function loadDashboard() {
+        function loadDashboard() {
       const countermeasure = document.getElementById('alarmCount');
       const kaizen = document.getElementById('normalCount');
       if (countermeasure) {
