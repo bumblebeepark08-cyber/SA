@@ -94,6 +94,8 @@
     th.date-column { width: 150px; text-align: center; }
     th.planned-date-column { width: 190px; }
     .date-cell { text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .date-input { width: 100%; min-width: 130px; padding: 7px 6px; border: 1px solid #c7d1df; border-radius: 6px; background: #fff; color: var(--ink); font: inherit; font-size: 12px; text-align: center; }
+    .date-input:focus { outline: 2px solid #1684d8; outline-offset: 1px; }
     .date-missing { color: var(--muted); }
     .status-label { display: inline-flex; align-items: center; gap: 7px; font-weight: bold; white-space: nowrap; }
     .status-countermeasure { color: var(--countermeasure); }
@@ -216,8 +218,8 @@
               <th scope="col">พื้นที่</th>
               <th scope="col">ประเภท</th>
               <th scope="col">รายละเอียด</th>
-              <th scope="col" class="status-column">Status</th>
               <th scope="col" class="responsible-column">ผู้รับผิดชอบ</th>
+              <th scope="col" class="status-column">Status</th>
               <th scope="col" class="date-column">วันที่พบปัญหา</th>
               <th scope="col" class="date-column planned-date-column">วันที่วางแผนแก้ไขเสร็จ</th>
             </tr>
@@ -284,7 +286,7 @@
       {area:'7-7.6ที่จอดรถเข็นใส่อุปกรณ์แบบลื้นชัก No.06', type:'Countermeasure', detail:'F026 Layout ไม่ตรง', responsible:'ธีระพันธ์ พ.', foundDate:'2026-10-27', plannedDate:'2026-11-30'},     
       {area:'7-8.6ที่เก็บกล่องเครื่องมือ No.06', type:'Countermeasure', detail:'F026 Layout ไม่ตรง', responsible:'ธีระพันธ์ พ.', foundDate:'2026-10-27', plannedDate:'2026-11-30'},
       {area:'7-8.6ที่เก็บกล่องเครื่องมือ No.06', type:'Countermeasure', detail:'F027 Layout ไม่ตรง', responsible:'ธีระพันธ์ พ.', foundDate:'2026-10-27', plannedDate:'2026-11-30'},
-      {area:'5-13Power Plugเคลื่อนที่', type:'Countermeasure', detail:'F028 ยังไม่มีที่เก็บ', responsible:'พิพัฒนพงษ์ น.', foundDate:'2026-11-04', plannedDate:'2026-12-25'},      
+      
 
     ];
 
@@ -704,6 +706,7 @@
     // ==================== ตารางและตัวนับ ====================
     // เก็บ Status ที่เลือกไว้ในเบราว์เซอร์เครื่องนี้ แม้ปิดแล้วเปิดหน้าใหม่ก็ยังอยู่
     const STATUS_STORAGE_KEY = '5s-dashboard-item-status-v1';
+    const DATE_STORAGE_KEY = '5s-dashboard-item-dates-v1';
     function statusStorageKey(item) {
       return [item.area || '', item.type || '', item.detail || '', item.responsible || ''].join('|');
     }
@@ -716,6 +719,35 @@
       saved[statusStorageKey(item)] = value;
       try { localStorage.setItem(STATUS_STORAGE_KEY, JSON.stringify(saved)); }
       catch (_) { /* หากเบราว์เซอร์ปิดการจัดเก็บ ยังเลือกสถานะในหน้าปัจจุบันได้ */ }
+    }
+    function readSavedDates() {
+      try { return JSON.parse(localStorage.getItem(DATE_STORAGE_KEY) || '{}'); }
+      catch (_) { return {}; }
+    }
+    function dateStorageKey(item, field) {
+      return `${statusStorageKey(item)}|${field}`;
+    }
+    function dateInputCell(item, field, label) {
+      const saved = readSavedDates();
+      const key = dateStorageKey(item, field);
+      const value = Object.prototype.hasOwnProperty.call(saved, key) ? saved[key] : (item[field] || '');
+      item[field] = value;
+      const td = document.createElement('td');
+      td.className = 'date-cell';
+      const input = document.createElement('input');
+      input.type = 'date';
+      input.className = 'date-input';
+      input.value = value;
+      input.setAttribute('aria-label', `${label}: ${item.area || item.detail || ''}`);
+      input.addEventListener('change', () => {
+        item[field] = input.value;
+        const dates = readSavedDates();
+        dates[key] = input.value;
+        try { localStorage.setItem(DATE_STORAGE_KEY, JSON.stringify(dates)); }
+        catch (_) { /* หากปิดการจัดเก็บ วันที่จะยังอยู่จนกว่าจะปิดหน้า */ }
+      });
+      td.appendChild(input);
+      return td;
     }
     function statusSelect(item) {
       const saved = readSavedStatuses();
@@ -775,11 +807,9 @@
         detail.textContent = item.detail || '—';
         responsible.className = 'responsible-cell';
         responsible.textContent = String(item.responsible || '').trim() || '—';
-        foundDate.className = 'date-cell';
-        plannedDate.className = 'date-cell';
-        foundDate.appendChild(reportDate(item.foundDate));
-        plannedDate.appendChild(reportDate(item.plannedDate));
-        tr.append(area, type, detail, statusSelect(item), responsible, foundDate, plannedDate);
+        tr.append(area, type, detail, responsible, statusSelect(item),
+          dateInputCell(item, 'foundDate', 'วันที่พบปัญหา'),
+          dateInputCell(item, 'plannedDate', 'วันที่วางแผนแก้ไขเสร็จ'));
         tbody.appendChild(tr);
       });
       if (!filtered.length) {
