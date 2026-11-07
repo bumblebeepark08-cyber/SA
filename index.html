@@ -551,7 +551,7 @@
     // วางดอทด้านหน้าปลายหัวลูกศรตามทิศที่ชี้ โดยเว้นช่องว่าง 5 หน่วย
     function markerPosition(zone, index, total) {
       const {w, h, direction} = zone;
-      const offset = 10 + 14 + 5; // ปลายลูกศร + รัศมีดอท + ช่องว่าง
+      const offset = 10 + 16 + 5; // ปลายลูกศร + รัศมีดอท + ช่องว่าง
       const cross = (index - (total - 1) / 2) * 32;
       if (direction === 'up') return {cx: cross, cy: -h - offset};
       if (direction === 'down') return {cx: cross, cy: h + offset};
@@ -577,12 +577,23 @@
         if (!statuses.length) return;
         const markers = node('g', {class: 'zone-status-markers', 'aria-hidden': 'true'}, zone.group);
         statuses.forEach((status, index) => {
+          const position = markerPosition(zone, index, statuses.length);
           const dot = node('circle', {
-            ...markerPosition(zone, index, statuses.length), r: 14,
+            ...position, r: 16,
             fill: STATUS_COLORS[status.type], stroke: '#ffffff', 'stroke-width': 3,
             class: `zone-status-dot ${status.type === 'Countermeasure' ? 'zone-red-dot' : 'zone-green-dot'}`,
             'data-type': status.type, 'data-count': status.count
           }, markers);
+
+          // แสดงจำนวนรายการเป็นตัวเลขสีขาวตรงกลางดอท
+          const countText = node('text', {
+            x: position.cx, y: position.cy,
+            'text-anchor': 'middle', 'dominant-baseline': 'central',
+            'font-size': 16, 'font-weight': 'bold', fill: '#ffffff',
+            'pointer-events': 'none'
+          }, markers);
+          countText.textContent = status.count;
+
           node('title', {}, dot).textContent = `${status.type}: ${status.count} รายการ · กดเพื่อดูรายละเอียด`;
         });
       });
